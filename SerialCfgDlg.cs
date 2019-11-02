@@ -18,6 +18,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
 using System.IO.Ports;
 using NPOI.HSSF.UserModel;
 using NPOI.HPSF;
@@ -35,25 +36,16 @@ namespace FOGTestPlatform
         public SerialCfgDlg()
         {
             InitializeComponent();
-            SetConfigFile();
+            //SetConfigFile();
             setComBox();
-            
+            checkedListBox_Channel.SetItemChecked(0, true);
+            CBox_Table_BaudRate.SelectedIndex = 6;
+            cBox_Table_DataBit.SelectedIndex  = 1;
+            cBox_Table_StopBit.SelectedIndex  = 1;
+            cBox_Table_ParityBit.SelectedIndex = 1;
         }
 
-        SerialPort table_serial = new SerialPort();
-        SerialPort ch1_serial   = new SerialPort();
-        SerialPort ch2_serial   = new SerialPort();
-        SerialPort ch3_serial   = new SerialPort();
-        SerialPort ch4_serial   = new SerialPort();
-        SerialPort ch5_serial   = new SerialPort();
-
-        serialParameter tableSerialPara = new serialParameter();
-        serialParameter ch1SerialPara   = new serialParameter();
-        serialParameter ch2SerialPara   = new serialParameter();
-        serialParameter ch3SerialPara   = new serialParameter();
-        serialParameter ch4SerialPara   = new serialParameter();
-        serialParameter ch5SerialPara   = new serialParameter();
-        serialParameter ch6SerialPara = new serialParameter();
+        
         /*************************************
         函数名：InitializeConfigFile
         创建日期：2019/10/24
@@ -63,7 +55,257 @@ namespace FOGTestPlatform
         *************************************/
         public void SetConfigFile()
         {
-            
+            int SelectedChannelsNum = 0;
+            //读入配置文件
+            FileStream rfile = new FileStream(FilePara.ConfigFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            XSSFWorkbook workbook = new XSSFWorkbook(rfile);
+            rfile.Close();
+
+            ISheet sht = workbook.GetSheet("通道串口配置");
+            //配置转台通道
+            IRow row = sht.GetRow(1);
+            ICell cell = GetCell(sht, 1, 1);
+            if (groupBox_Table.Enabled)
+            {
+                cell.SetCellValue("True");
+                cell = GetCell(sht, 1, 2);
+                if (cBox_Table_COMID.SelectedItem == null)
+                {
+                    cell.SetCellValue(cBox_Table_COMID.SelectedItem.ToString());
+                }
+                else
+                {
+                    cell.SetCellValue(cBox_Table_COMID.SelectedItem.ToString());
+                }
+                
+                cell = GetCell(sht, 1, 3);
+                cell.SetCellValue(CBox_Table_BaudRate.SelectedItem.ToString());
+                cell = GetCell(sht, 1, 4);
+                cell.SetCellValue(cBox_Table_DataBit.SelectedItem.ToString());
+                cell = GetCell(sht, 1, 5);
+                cell.SetCellValue(cBox_Table_StopBit.SelectedItem.ToString());
+                cell = GetCell(sht, 1, 6);
+                cell.SetCellValue(cBox_Table_ParityBit.SelectedItem.ToString());
+                cell = GetCell(sht, 1, 7);
+                cell.SetCellValue(tBox_table_ID.Text);
+            }
+            else
+            {
+                cell.SetCellValue("False");
+            }
+
+            //配置测试通道一
+            row = sht.GetRow(2);
+            cell = GetCell(sht, 2, 1);
+            if (groupBox_channel_1.Enabled)
+            {
+                cell.SetCellValue("True");
+                cell = GetCell(sht, 2, 2);
+                if (cBox_CH1_COMID.SelectedItem == null)
+                {
+                    cell.SetCellValue("null");
+                }
+                else
+                {
+                    cell.SetCellValue(cBox_CH1_COMID.SelectedItem.ToString());
+                }
+                cell = GetCell(sht, 2, 3);
+                cell.SetCellValue(cBox_CH1_BaudRate.SelectedItem.ToString());
+                cell = GetCell(sht, 2, 4);
+                cell.SetCellValue(cBox_CH1_DataBit.SelectedItem.ToString());
+                cell = GetCell(sht, 2, 5);
+                cell.SetCellValue(cBox_CH1_StopBit.SelectedItem.ToString());
+                cell = GetCell(sht, 2, 6);
+                cell.SetCellValue(cBox_CH1_ParityBit.SelectedItem.ToString());
+                cell = GetCell(sht, 2, 7);
+                cell.SetCellValue(tBox_CH1_FOGID.Text);
+                SelectedChannelsNum++;
+            }
+            else
+            {
+                cell.SetCellValue("False");
+            }
+            //配置测试通道二
+            row = sht.GetRow(3);
+            cell = GetCell(sht, 3, 1);
+            if (groupBox_channel_2.Enabled)
+            {
+                cell.SetCellValue("True");
+                cell = GetCell(sht, 3, 2);
+                if (cBox_CH2_COMID.SelectedItem == null)
+                {
+                    cell.SetCellValue("null");
+                }
+                else
+                {
+                    cell.SetCellValue(cBox_CH2_COMID.SelectedItem.ToString());
+                }
+                cell = GetCell(sht, 3, 3);
+                cell.SetCellValue(cBox_CH2_BaudRate.SelectedItem.ToString());
+                cell = GetCell(sht, 3, 4);
+                cell.SetCellValue(cBox_CH2_DataBit.SelectedItem.ToString());
+                cell = GetCell(sht, 3, 5);
+                cell.SetCellValue(cBox_CH2_StopBit.SelectedItem.ToString());
+                cell = GetCell(sht, 3, 6);
+                cell.SetCellValue(cBox_CH2_ParityBit.SelectedItem.ToString());
+                cell = GetCell(sht, 3, 7);
+                cell.SetCellValue(tBox_CH2_FOGID.Text);
+                SelectedChannelsNum++;
+            }
+            else
+            {
+                cell.SetCellValue("False");
+            }
+            //配置测试通道三
+            row = sht.GetRow(4);
+            cell = GetCell(sht, 4, 1);
+            if (groupBox_channel_3.Enabled)
+            {
+                cell.SetCellValue("True");
+                cell = GetCell(sht, 4, 2);
+                if (cBox_CH3_COMID.SelectedItem == null)
+                {
+                    cell.SetCellValue("null");
+                }
+                else
+                {
+                    cell.SetCellValue(cBox_CH3_COMID.SelectedItem.ToString());
+                }
+                
+                cell = GetCell(sht, 4, 3);
+                cell.SetCellValue(cBox_CH3_BaudRate.SelectedItem.ToString());
+                cell = GetCell(sht, 4, 4);
+                cell.SetCellValue(cBox_CH3_DataBit.SelectedItem.ToString());
+                cell = GetCell(sht, 4, 5);
+                cell.SetCellValue(cBox_CH3_StopBit.SelectedItem.ToString());
+                cell = GetCell(sht, 4, 6);
+                cell.SetCellValue(cBox_CH3_ParityBit.SelectedItem.ToString());
+                cell = GetCell(sht, 4, 7);
+                cell.SetCellValue(tBox_CH3_FOGID.Text);
+                SelectedChannelsNum++;
+            }
+            else
+            {
+                cell.SetCellValue("False");
+            }
+            //配置测试通道四
+            row = sht.GetRow(5);
+            cell = GetCell(sht, 5, 1);
+            if (groupBox_channel_4.Enabled)
+            {
+                cell.SetCellValue("True");
+                cell = GetCell(sht, 5, 2);
+                if (cBox_CH4_COMID.SelectedItem == null)
+                {
+                    cell.SetCellValue("null");
+                }
+                else
+                {
+                    cell.SetCellValue(cBox_CH4_COMID.SelectedItem.ToString());
+                }
+                cell = GetCell(sht, 5, 3);
+                cell.SetCellValue(cBox_CH4_BaudRate.SelectedItem.ToString());
+                cell = GetCell(sht, 5, 4);
+                cell.SetCellValue(cBox_CH4_DataBit.SelectedItem.ToString());
+                cell = GetCell(sht, 5, 5);
+                cell.SetCellValue(cBox_CH4_StopBit.SelectedItem.ToString());
+                cell = GetCell(sht, 5, 6);
+                cell.SetCellValue(cBox_CH4_ParityBit.SelectedItem.ToString());
+                cell = GetCell(sht, 5, 7);
+                cell.SetCellValue(tBox_CH4_FOGID.Text);
+                SelectedChannelsNum++;
+            }
+            else
+            {
+                cell.SetCellValue("False");
+            }
+            //配置测试通道五
+            row = sht.GetRow(6);
+            cell = GetCell(sht, 6, 1);
+            if (groupBox_channel_5.Enabled)
+            {
+                cell.SetCellValue("True");
+                cell = GetCell(sht, 6, 2);
+                if (cBox_CH5_COMID.SelectedItem == null)
+                {
+                    cell.SetCellValue("null");
+                }
+                else
+                {
+                    cell.SetCellValue(cBox_CH5_COMID.SelectedItem.ToString());
+                }
+                
+                cell = GetCell(sht, 6, 3);
+                cell.SetCellValue(cBox_CH5_BaudRate.SelectedItem.ToString());
+                cell = GetCell(sht, 6, 4);
+                cell.SetCellValue(cBox_CH5_DataBit.SelectedItem.ToString());
+                cell = GetCell(sht, 6, 5);
+                cell.SetCellValue(cBox_CH5_StopBit.SelectedItem.ToString());
+                cell = GetCell(sht, 6, 6);
+                cell.SetCellValue(cBox_CH5_ParityBit.SelectedItem.ToString());
+                cell = GetCell(sht, 6, 7);
+                cell.SetCellValue(tBox_CH5_FOGID.Text);
+                SelectedChannelsNum++;
+            }
+            else
+            {
+                cell.SetCellValue("False");
+            }
+            //配置测试通道六
+            row = sht.GetRow(7);
+            cell = GetCell(sht, 7, 1);
+            if (groupBox_channel_6.Enabled)
+            {
+                cell.SetCellValue("True");
+                cell = GetCell(sht, 7, 2);
+                if (cBox_CH6_COMID.SelectedItem == null)
+                {
+                    cell.SetCellValue("null");
+                }
+                else
+                {
+                    cell.SetCellValue(cBox_CH6_COMID.SelectedItem.ToString());
+                }
+                
+                cell = GetCell(sht, 7, 3);
+                cell.SetCellValue(cBox_CH6_BaudRate.SelectedItem.ToString());
+                cell = GetCell(sht, 7, 4);
+                cell.SetCellValue(cBox_CH6_DataBit.SelectedItem.ToString());
+                cell = GetCell(sht, 7, 5);
+                cell.SetCellValue(cBox_CH6_StopBit.SelectedItem.ToString());
+                cell = GetCell(sht, 7, 6);
+                cell.SetCellValue(cBox_CH6_ParityBit.SelectedItem.ToString());
+                cell = GetCell(sht, 7, 7);
+                cell.SetCellValue(tBox_CH6_FOGID.Text);
+                SelectedChannelsNum++;
+            }
+            else
+            {
+                cell.SetCellValue("False");
+            }
+            cell = GetCell(sht, 8, 1);
+            cell.SetCellValue(SelectedChannelsNum);
+            //写入配置文件
+            FileStream wfile = new FileStream(FilePara.ConfigFilePath, FileMode.Open, FileAccess.ReadWrite);
+            workbook.Write(wfile);
+            wfile.Close();
+        }
+        /*************************************
+        函数名：GetCell
+        创建日期：2019/10/25
+        函数功能：判断EXCEL中单元格是否创建，没有则创建
+        函数参数：
+        	sheet
+        	row_num
+        	cell_num
+        返回值：NPOI.SS.UserModel.ICell
+        *************************************/
+        public ICell GetCell(ISheet sheet, int row_num, int cell_num)
+        {
+            IRow row = sheet.GetRow(row_num)    == null ? sheet.CreateRow(row_num) : sheet.GetRow(row_num);
+            ICell cell  = row.GetCell(cell_num) == null ? row.CreateCell(cell_num) : row.GetCell(cell_num);
+
+            return cell;
         }
         /*************************************
         函数名：setComBox
@@ -119,68 +361,10 @@ namespace FOGTestPlatform
         *************************************/
         private void Btn_OK_Click(object sender, EventArgs e)
         {
-         
-            if (checkedListBox_Channel.GetItemChecked(0))
-            {
-                tableSerialPara.comName   = cBox_Table_COMID.SelectedItem.ToString();
-                tableSerialPara.baudRate  = CBox_Table_BaudRate.SelectedItem.ToString();
-                tableSerialPara.dataBit   = cBox_Table_DataBit.SelectedItem.ToString();
-                tableSerialPara.stopBit   = cBox_Table_StopBit.SelectedItem.ToString();
-                tableSerialPara.parityBit = cBox_Table_CheckBit.SelectedItem.ToString();
-            }
-
-            if (ch1SerialPara.serial_enable)
-            {
-                ch1SerialPara.comName   = cBox_CH1_COMID.SelectedItem.ToString();
-                ch1SerialPara.baudRate  = cBox_CH1_BaudRate.SelectedItem.ToString();
-                ch1SerialPara.dataBit   = cBox_CH1_DataBit.SelectedItem.ToString();
-                ch1SerialPara.stopBit   = cBox_CH1_StopBit.SelectedItem.ToString();
-                ch1SerialPara.parityBit = cBox_CH1_CheckBit.SelectedItem.ToString();
-            }
-
-            if (ch2SerialPara.serial_enable)
-            {
-                ch2SerialPara.comName   = cBox_CH2_COMID.SelectedItem.ToString();
-                ch2SerialPara.baudRate  = cBox_CH2_BaudRate.SelectedItem.ToString();
-                ch2SerialPara.dataBit   = cBox_CH2_DataBit.SelectedItem.ToString();
-                ch2SerialPara.stopBit   = cBox_CH2_StopBit.SelectedItem.ToString();
-                ch2SerialPara.parityBit = cBox_CH2_CheckBit.SelectedItem.ToString();
-            }
-
-            if (ch3SerialPara.serial_enable)
-            {
-                ch3SerialPara.comName   = cBox_CH3_COMID.SelectedItem.ToString();
-                ch3SerialPara.baudRate  = cBox_CH3_BaudRate.SelectedItem.ToString();
-                ch3SerialPara.dataBit   = cBox_CH3_DataBit.SelectedItem.ToString();
-                ch3SerialPara.stopBit   = cBox_CH3_StopBit.SelectedItem.ToString();
-                ch3SerialPara.parityBit = cBox_CH3_CheckBit.SelectedItem.ToString();
-            }
-
-            if (ch4SerialPara.serial_enable)
-            {
-                ch4SerialPara.comName   = cBox_CH4_COMID.SelectedItem.ToString();
-                ch4SerialPara.baudRate  = cBox_CH4_BaudRate.SelectedItem.ToString();
-                ch4SerialPara.dataBit   = cBox_CH4_DataBit.SelectedItem.ToString();
-                ch4SerialPara.stopBit   = cBox_CH4_StopBit.SelectedItem.ToString();
-                ch4SerialPara.parityBit = cBox_CH4_CheckBit.SelectedItem.ToString();
-            }
-
-            if (ch5SerialPara.serial_enable)
-            {
-                ch5SerialPara.comName   = cBox_CH5_COMID.SelectedItem.ToString();
-                ch5SerialPara.baudRate  = cBox_CH5_BaudRate.SelectedItem.ToString();
-                ch5SerialPara.dataBit   = cBox_CH5_DataBit.SelectedItem.ToString();
-                ch5SerialPara.stopBit   = cBox_CH5_StopBit.SelectedItem.ToString();
-                ch5SerialPara.parityBit = cBox_CH5_CheckBit.SelectedItem.ToString();
-            }
-            
+            SetConfigFile();
         }
 
-        private void checkedListBox1_SelectedValueChanged(object sender, EventArgs e)
-        {
-            
-        }
-
+        
         /*************************************
         函数名：checkedListBox_Channel_SelectedIndexChanged
         创建日期：2019/09/29
@@ -195,82 +379,96 @@ namespace FOGTestPlatform
             //转台通道串口配置使能
             if(checkedListBox_Channel.GetItemChecked(0))
             {
-                groupBox_Table.Enabled = true;
-                tableSerialPara.serial_enable = true;
+                groupBox_Table.Enabled            = true;
+                CBox_Table_BaudRate.SelectedIndex = 6;
+                cBox_Table_DataBit.SelectedIndex  = 1;
+                cBox_Table_StopBit.SelectedIndex  = 1;
+                cBox_Table_ParityBit.SelectedIndex = 1;
             }
             else
             {
                 groupBox_Table.Enabled = false;
-                tableSerialPara.serial_enable = false;
             }
             //通道1串口配置使能
             if (checkedListBox_Channel.GetItemChecked(1))
             {
-                groupBox_channel_1.Enabled = true;
-                ch1SerialPara.serial_enable = true;
+                groupBox_channel_1.Enabled      = true;
+                cBox_CH1_BaudRate.SelectedIndex = 8;
+                cBox_CH1_DataBit.SelectedIndex  = 1;
+                cBox_CH1_StopBit.SelectedIndex  = 1;
+                cBox_CH1_ParityBit.SelectedIndex = 2;
             }
             else
             {
                 groupBox_channel_1.Enabled = false;
-                ch1SerialPara.serial_enable = false;
             }
             //通道2串口配置使能
             if (checkedListBox_Channel.GetItemChecked(2))
             {
-                groupBox_channel_2.Enabled = true;
-                ch2SerialPara.serial_enable = true;
+                groupBox_channel_2.Enabled      = true;
+                cBox_CH2_BaudRate.SelectedIndex = 8;
+                cBox_CH2_DataBit.SelectedIndex  = 1;
+                cBox_CH2_StopBit.SelectedIndex  = 1;
+                cBox_CH2_ParityBit.SelectedIndex = 2;
             }
             else
             {
                 groupBox_channel_2.Enabled = false;
-                ch2SerialPara.serial_enable = false;
             }
             //通道3串口配置使能
             if (checkedListBox_Channel.GetItemChecked(3))
             {
-                groupBox_channel_3.Enabled = true;
-                ch3SerialPara.serial_enable = true;
+                groupBox_channel_3.Enabled      = true;
+                cBox_CH3_BaudRate.SelectedIndex = 8;
+                cBox_CH3_DataBit.SelectedIndex  = 1;
+                cBox_CH3_StopBit.SelectedIndex  = 1;
+                cBox_CH3_ParityBit.SelectedIndex = 2;
             }                    
             else                 
             {                    
                 groupBox_channel_3.Enabled = false;
-                ch3SerialPara.serial_enable = false;
             }
             //通道4串口配置使能
             if (checkedListBox_Channel.GetItemChecked(4))
             {
-                groupBox_channel_4.Enabled = true;
-                ch4SerialPara.serial_enable = true;
+                groupBox_channel_4.Enabled      = true;
+                cBox_CH4_BaudRate.SelectedIndex = 8;
+                cBox_CH4_DataBit.SelectedIndex  = 1;
+                cBox_CH4_StopBit.SelectedIndex  = 1;
+                cBox_CH4_ParityBit.SelectedIndex = 2;
             }
             else
             {
                 groupBox_channel_4.Enabled = false;
-                ch4SerialPara.serial_enable = false;
             }
             //通道5串口配置使能
             if (checkedListBox_Channel.GetItemChecked(5))
             {
-                groupBox_channel_5.Enabled = true;
-                ch5SerialPara.serial_enable = true;
+                groupBox_channel_5.Enabled      = true;
+                cBox_CH5_BaudRate.SelectedIndex = 8;
+                cBox_CH5_DataBit.SelectedIndex  = 1;
+                cBox_CH5_StopBit.SelectedIndex  = 1;
+                cBox_CH5_ParityBit.SelectedIndex = 2;
             }
             else
             {
                 groupBox_channel_5.Enabled = false;
-                ch5SerialPara.serial_enable = false;
             }
             //通道6串口配置使能
             if (checkedListBox_Channel.GetItemChecked(6))
             {
-                groupBox_channel_6.Enabled = true;
-                ch6SerialPara.serial_enable = true;
+                groupBox_channel_6.Enabled      = true;
+                cBox_CH6_BaudRate.SelectedIndex = 8;
+                cBox_CH6_DataBit.SelectedIndex  = 1;
+                cBox_CH6_StopBit.SelectedIndex  = 1;
+                cBox_CH6_ParityBit.SelectedIndex = 2;
             }
             else
             {
                 groupBox_channel_6.Enabled = false;
-                ch6SerialPara.serial_enable = false;
             }
         }
 
-        
+      
     }
 }
