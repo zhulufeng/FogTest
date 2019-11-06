@@ -33,6 +33,7 @@ namespace FOGTestPlatform
     
     public partial class SerialCfgDlg : Form
     {
+        bool isByFile = false;
         public SerialCfgDlg()
         {
             InitializeComponent();
@@ -43,9 +44,195 @@ namespace FOGTestPlatform
             cBox_Table_DataBit.SelectedIndex  = 1;
             cBox_Table_StopBit.SelectedIndex  = 1;
             cBox_Table_ParityBit.SelectedIndex = 1;
+            isByFile = false;
         }
+        public SerialCfgDlg(XSSFWorkbook workbook)
+        {
+            InitializeComponent();
+            //SetConfigFile();
+            isByFile = true;
+            setComBox();
+            SetFormByConfigFile(workbook);
+            
+            
+        }
+        /*************************************
+        函数名：SetFormByConfigFile
+        创建日期：2019/11/06
+        函数功能：
+        函数参数：
+        workbook
+        返回值：void
+        *************************************/
+        public void SetFormByConfigFile(XSSFWorkbook workbook)
+        {
+            ISheet sht = workbook.GetSheet("通道串口配置");
+            this.groupBox_Table.Enabled = false;
+            this.groupBox_channel_1.Enabled = false;
+            this.groupBox_channel_2.Enabled = false;
+            this.groupBox_channel_3.Enabled = false;
+            this.groupBox_channel_4.Enabled = false;
+            this.groupBox_channel_5.Enabled = false;
+            this.groupBox_channel_6.Enabled = false;
+            for (int i = 0; i < sht.LastRowNum; i++)
+            {
+                if (sht.GetRow(i).GetCell(1).ToString().Equals("true",StringComparison.OrdinalIgnoreCase))//判断通道是否使能
+                {
+                    SetGroupBoxByFile(sht.GetRow(i).GetCell(0).ToString(), sht);
+                }
+                
+            }
 
-        
+            
+        }
+        /*************************************
+        函数名：SetGroupBoxByFile
+        创建日期：2019/11/06
+        函数功能：
+        函数参数：
+        ChannelID
+        返回值：void
+        *************************************/
+        public void SetGroupBoxByFile(string ChannelID,ISheet sht)
+        {
+            string[] ArryPort = SerialPort.GetPortNames();//搜索
+            switch (ChannelID)
+            {
+                case "转台通道":
+                    {
+                        groupBox_Table.Enabled    = true;
+                        checkedListBox_Channel.SetItemChecked(0, true);
+                        tBox_table_ID.Text        = sht.GetRow(1).GetCell(7).ToString();
+                        CBox_Table_BaudRate.Text  = sht.GetRow(1).GetCell(3).ToString();
+                        cBox_Table_DataBit.Text   = sht.GetRow(1).GetCell(4).ToString();
+                        cBox_Table_StopBit.Text   = sht.GetRow(1).GetCell(5).ToString();
+                        cBox_Table_ParityBit.Text = sht.GetRow(1).GetCell(6).ToString();
+                        if (ArryPort.Contains(sht.GetRow(1).GetCell(2).ToString().ToUpper()))
+                        {
+                            cBox_Table_COMID.Text = sht.GetRow(1).GetCell(2).ToString().ToUpper();
+                        }
+                        else
+                        {
+                            MessageBox.Show("串口号不对，请在列表中选择！");
+                        }
+                        break;
+                    }
+                case "通道一":
+                    {
+                        groupBox_channel_1.Enabled = true;
+                        checkedListBox_Channel.SetItemChecked(1, true);
+                        tBox_CH1_FOGID.Text     = sht.GetRow(2).GetCell(7).ToString();
+                        cBox_CH1_BaudRate.Text  = sht.GetRow(2).GetCell(3).ToString();
+                        cBox_CH1_DataBit.Text   = sht.GetRow(2).GetCell(4).ToString();
+                        cBox_CH1_StopBit.Text   = sht.GetRow(2).GetCell(5).ToString();
+                        cBox_CH1_ParityBit.Text = sht.GetRow(2).GetCell(6).ToString();
+                        if (ArryPort.Contains(sht.GetRow(2).GetCell(2).ToString().ToUpper()))
+                        {
+                            cBox_CH1_COMID.Text = sht.GetRow(2).GetCell(2).ToString().ToUpper();
+                        }
+                        else
+                        {
+                            MessageBox.Show("串口号不对，请在列表中选择！");
+                        }
+                        break;
+                    }
+                case "通道二":
+                    {
+                        groupBox_channel_2.Enabled = true;
+                        checkedListBox_Channel.SetItemChecked(2, true);
+                        tBox_CH2_FOGID.Text     = sht.GetRow(3).GetCell(7).ToString();
+                        cBox_CH2_BaudRate.Text  = sht.GetRow(3).GetCell(3).ToString();
+                        cBox_CH2_DataBit.Text   = sht.GetRow(3).GetCell(4).ToString();
+                        cBox_CH2_StopBit.Text   = sht.GetRow(3).GetCell(5).ToString();
+                        cBox_CH2_ParityBit.Text = sht.GetRow(3).GetCell(6).ToString();
+                        if (ArryPort.Contains(sht.GetRow(3).GetCell(2).ToString().ToUpper()))
+                        {
+                            cBox_CH2_COMID.Text = sht.GetRow(3).GetCell(2).ToString().ToUpper();
+                        }
+                        else
+                        {
+                            MessageBox.Show("串口号不对，请在列表中选择！");
+                        }
+                        break;
+                    }
+                case "通道三":
+                    {
+                        groupBox_channel_3.Enabled = true;
+                        checkedListBox_Channel.SetItemChecked(3, true);
+                        tBox_CH3_FOGID.Text     = sht.GetRow(4).GetCell(7).ToString();
+                        cBox_CH3_BaudRate.Text  = sht.GetRow(4).GetCell(3).ToString();
+                        cBox_CH3_DataBit.Text   = sht.GetRow(4).GetCell(4).ToString();
+                        cBox_CH3_StopBit.Text   = sht.GetRow(4).GetCell(5).ToString();
+                        cBox_CH3_ParityBit.Text = sht.GetRow(4).GetCell(6).ToString();
+                        if (ArryPort.Contains(sht.GetRow(4).GetCell(2).ToString().ToUpper()))
+                        {
+                            cBox_CH3_COMID.Text = sht.GetRow(4).GetCell(2).ToString().ToUpper();
+                        }
+                        else
+                        {
+                            MessageBox.Show("串口号不对，请在列表中选择！");
+                        }
+                        break;
+                    }
+                case "通道四":
+                    {
+                        groupBox_channel_4.Enabled = true;
+                        checkedListBox_Channel.SetItemChecked(4, true);
+                        tBox_CH4_FOGID.Text     = sht.GetRow(5).GetCell(7).ToString();
+                        cBox_CH4_BaudRate.Text  = sht.GetRow(5).GetCell(3).ToString();
+                        cBox_CH4_DataBit.Text   = sht.GetRow(5).GetCell(4).ToString();
+                        cBox_CH4_StopBit.Text   = sht.GetRow(5).GetCell(5).ToString();
+                        cBox_CH4_ParityBit.Text = sht.GetRow(5).GetCell(6).ToString();
+                        if (ArryPort.Contains(sht.GetRow(5).GetCell(2).ToString().ToUpper()))
+                        {
+                            cBox_CH4_COMID.Text = sht.GetRow(5).GetCell(2).ToString().ToUpper();
+                        }
+                        else
+                        {
+                            MessageBox.Show("串口号不对，请在列表中选择！");
+                        }
+                        break;
+                    }
+                case "通道五":
+                    {
+                        groupBox_channel_5.Enabled = true;
+                        checkedListBox_Channel.SetItemChecked(5, true);
+                        tBox_CH5_FOGID.Text     = sht.GetRow(6).GetCell(7).ToString();
+                        cBox_CH5_BaudRate.Text  = sht.GetRow(6).GetCell(3).ToString();
+                        cBox_CH5_DataBit.Text   = sht.GetRow(6).GetCell(4).ToString();
+                        cBox_CH5_StopBit.Text   = sht.GetRow(6).GetCell(5).ToString();
+                        cBox_CH5_ParityBit.Text = sht.GetRow(6).GetCell(6).ToString();
+                        if (ArryPort.Contains(sht.GetRow(6).GetCell(2).ToString().ToUpper()))
+                        {
+                            cBox_CH5_COMID.Text = sht.GetRow(6).GetCell(2).ToString().ToUpper();
+                        }
+                        else
+                        {
+                            MessageBox.Show("串口号不对，请在列表中选择！");
+                        }
+                        break;
+                    }
+                case "通道六":
+                    {
+                        groupBox_channel_6.Enabled = true;
+                        checkedListBox_Channel.SetItemChecked(6, true);
+                        tBox_CH6_FOGID.Text     = sht.GetRow(7).GetCell(7).ToString();
+                        cBox_CH6_BaudRate.Text  = sht.GetRow(7).GetCell(3).ToString();
+                        cBox_CH6_DataBit.Text   = sht.GetRow(7).GetCell(4).ToString();
+                        cBox_CH6_StopBit.Text   = sht.GetRow(7).GetCell(5).ToString();
+                        cBox_CH6_ParityBit.Text = sht.GetRow(7).GetCell(6).ToString();
+                        if (ArryPort.Contains(sht.GetRow(7).GetCell(2).ToString().ToUpper()))
+                        {
+                            cBox_CH6_COMID.Text = sht.GetRow(7).GetCell(2).ToString().ToUpper();
+                        }
+                        else
+                        {
+                            MessageBox.Show("串口号不对，请在列表中选择！");
+                        }
+                        break;
+                    }
+            }
+        }
         /*************************************
         函数名：InitializeConfigFile
         创建日期：2019/10/24
@@ -88,6 +275,8 @@ namespace FOGTestPlatform
                 cell.SetCellValue(cBox_Table_ParityBit.SelectedItem.ToString());
                 cell = GetCell(sht, 1, 7);
                 cell.SetCellValue(tBox_table_ID.Text);
+                cell = GetCell(sht, 1, 8);
+                cell.SetCellValue("None");
             }
             else
             {
@@ -119,6 +308,8 @@ namespace FOGTestPlatform
                 cell.SetCellValue(cBox_CH1_ParityBit.SelectedItem.ToString());
                 cell = GetCell(sht, 2, 7);
                 cell.SetCellValue(tBox_CH1_FOGID.Text);
+                cell = GetCell(sht, 2, 8);
+                cell.SetCellValue(tBox_CH1_SF.Text);
                 SelectedChannelsNum++;
             }
             else
@@ -150,6 +341,8 @@ namespace FOGTestPlatform
                 cell.SetCellValue(cBox_CH2_ParityBit.SelectedItem.ToString());
                 cell = GetCell(sht, 3, 7);
                 cell.SetCellValue(tBox_CH2_FOGID.Text);
+                cell = GetCell(sht, 3, 8);
+                cell.SetCellValue(tBox_CH2_SF.Text);
                 SelectedChannelsNum++;
             }
             else
@@ -182,6 +375,8 @@ namespace FOGTestPlatform
                 cell.SetCellValue(cBox_CH3_ParityBit.SelectedItem.ToString());
                 cell = GetCell(sht, 4, 7);
                 cell.SetCellValue(tBox_CH3_FOGID.Text);
+                cell = GetCell(sht, 4, 8);
+                cell.SetCellValue(tBox_CH3_SF.Text);
                 SelectedChannelsNum++;
             }
             else
@@ -213,6 +408,8 @@ namespace FOGTestPlatform
                 cell.SetCellValue(cBox_CH4_ParityBit.SelectedItem.ToString());
                 cell = GetCell(sht, 5, 7);
                 cell.SetCellValue(tBox_CH4_FOGID.Text);
+                cell = GetCell(sht, 5, 8);
+                cell.SetCellValue(tBox_CH4_SF.Text); 
                 SelectedChannelsNum++;
             }
             else
@@ -245,6 +442,8 @@ namespace FOGTestPlatform
                 cell.SetCellValue(cBox_CH5_ParityBit.SelectedItem.ToString());
                 cell = GetCell(sht, 6, 7);
                 cell.SetCellValue(tBox_CH5_FOGID.Text);
+                cell = GetCell(sht, 6, 8);
+                cell.SetCellValue(tBox_CH5_SF.Text);
                 SelectedChannelsNum++;
             }
             else
@@ -277,6 +476,8 @@ namespace FOGTestPlatform
                 cell.SetCellValue(cBox_CH6_ParityBit.SelectedItem.ToString());
                 cell = GetCell(sht, 7, 7);
                 cell.SetCellValue(tBox_CH6_FOGID.Text);
+                cell = GetCell(sht, 7, 8);
+                cell.SetCellValue(tBox_CH6_SF.Text);
                 SelectedChannelsNum++;
             }
             else

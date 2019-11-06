@@ -13,9 +13,10 @@ namespace FOGTestPlatform
     {
         public static string DataDirectory = null;
         public static string DataFileName = null;
-        public static string BaseDirectory = System.AppDomain.CurrentDomain.BaseDirectory + "TESTDATA";
+        public static string BaseDirectory = System.AppDomain.CurrentDomain.BaseDirectory + @"TESTDATA\";
         public static string CurrentDirectory;
         public static string ConfigFilePath;
+        public static string ConfigFileLoadPath; 
         public static string ClearDirectory = null;
     }
     class SerialParameter
@@ -37,11 +38,7 @@ namespace FOGTestPlatform
         public int numOftestChannels;
         public bool[] serialportEnable = new bool[7];
     }
-    public class Serialdata
-    {
-        public List<byte> buffer = new List<byte>(4096);
-        Fogdata fogdata = new Fogdata();
-    }
+ 
     public class Fogdata
     {
         public int i_fdata;
@@ -52,15 +49,20 @@ namespace FOGTestPlatform
         public double d_tdata;
         public double d_fdata_1s;
         public double d_tdata_1s;
-        public List<double> fdata_array = new List<double>();
+        public List<double> fdata_array = new List<double>();//用于平滑的列表
         public List<double> tdata_array = new List<double>();
         public List<double> fdata_1s_array = new List<double>();
         public List<double> tdata_1s_array = new List<double>();
         public double ave_Fog_data;
         public double std_Fog_data;
         public double Fog_Bias_std;
+        public double scaleFactor;
+        public double Fog_Comped_data;
         public string FOGID;
+        public string FOG_Channel;
+        public string Fog_PortName;
         public List<byte> buffer = new List<byte>(4096);
+        public bool zoomed_flag = false;
 
     }
     class TableData
@@ -70,11 +72,15 @@ namespace FOGTestPlatform
         public double table_angle;
         public byte[] arrayOriginData = new byte[12];
         public int Counter = 0;
+        
     }
     class TimePara
     {
         public int total_time = 0;
         public int dt;
         public int sampleFreq = 200;
+        public int drawCount = 0;
+        public int testTimes = 0;
+        public List<int> drawIndexTime = new List<int>();
     }
 }

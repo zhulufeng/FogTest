@@ -83,7 +83,9 @@
             this.Btn_OK = new System.Windows.Forms.Button();
             this.Btn_Cancel = new System.Windows.Forms.Button();
             this.groupBox_channel_5 = new System.Windows.Forms.GroupBox();
+            this.label41 = new System.Windows.Forms.Label();
             this.label26 = new System.Windows.Forms.Label();
+            this.tBox_CH5_FOGID = new System.Windows.Forms.TextBox();
             this.cBox_CH5_ParityBit = new System.Windows.Forms.ComboBox();
             this.label27 = new System.Windows.Forms.Label();
             this.cBox_CH5_StopBit = new System.Windows.Forms.ComboBox();
@@ -108,8 +110,10 @@
             this.cBox_CH2_COMID = new System.Windows.Forms.ComboBox();
             this.checkedListBox_Channel = new System.Windows.Forms.CheckedListBox();
             this.groupBox_channel_6 = new System.Windows.Forms.GroupBox();
+            this.label42 = new System.Windows.Forms.Label();
             this.label31 = new System.Windows.Forms.Label();
             this.cBox_CH6_ParityBit = new System.Windows.Forms.ComboBox();
+            this.tBox_CH6_FOGID = new System.Windows.Forms.TextBox();
             this.label32 = new System.Windows.Forms.Label();
             this.cBox_CH6_StopBit = new System.Windows.Forms.ComboBox();
             this.label33 = new System.Windows.Forms.Label();
@@ -118,10 +122,18 @@
             this.cBox_CH6_BaudRate = new System.Windows.Forms.ComboBox();
             this.label35 = new System.Windows.Forms.Label();
             this.cBox_CH6_COMID = new System.Windows.Forms.ComboBox();
-            this.label41 = new System.Windows.Forms.Label();
-            this.tBox_CH5_FOGID = new System.Windows.Forms.TextBox();
-            this.tBox_CH6_FOGID = new System.Windows.Forms.TextBox();
-            this.label42 = new System.Windows.Forms.Label();
+            this.tBox_CH1_SF = new System.Windows.Forms.TextBox();
+            this.label43 = new System.Windows.Forms.Label();
+            this.label44 = new System.Windows.Forms.Label();
+            this.tBox_CH2_SF = new System.Windows.Forms.TextBox();
+            this.label45 = new System.Windows.Forms.Label();
+            this.tBox_CH3_SF = new System.Windows.Forms.TextBox();
+            this.label46 = new System.Windows.Forms.Label();
+            this.tBox_CH4_SF = new System.Windows.Forms.TextBox();
+            this.label47 = new System.Windows.Forms.Label();
+            this.tBox_CH5_SF = new System.Windows.Forms.TextBox();
+            this.label48 = new System.Windows.Forms.Label();
+            this.tBox_CH6_SF = new System.Windows.Forms.TextBox();
             this.groupBox_Table.SuspendLayout();
             this.groupBox_channel_1.SuspendLayout();
             this.groupBox_channel_3.SuspendLayout();
@@ -286,6 +298,8 @@
             // 
             // groupBox_channel_1
             // 
+            this.groupBox_channel_1.Controls.Add(this.label43);
+            this.groupBox_channel_1.Controls.Add(this.tBox_CH1_SF);
             this.groupBox_channel_1.Controls.Add(this.label36);
             this.groupBox_channel_1.Controls.Add(this.tBox_CH1_FOGID);
             this.groupBox_channel_1.Controls.Add(this.label6);
@@ -301,7 +315,7 @@
             this.groupBox_channel_1.Enabled = false;
             this.groupBox_channel_1.Location = new System.Drawing.Point(376, 34);
             this.groupBox_channel_1.Name = "groupBox_channel_1";
-            this.groupBox_channel_1.Size = new System.Drawing.Size(255, 336);
+            this.groupBox_channel_1.Size = new System.Drawing.Size(236, 381);
             this.groupBox_channel_1.TabIndex = 5;
             this.groupBox_channel_1.TabStop = false;
             this.groupBox_channel_1.Text = "通道一";
@@ -440,6 +454,8 @@
             // 
             // groupBox_channel_3
             // 
+            this.groupBox_channel_3.Controls.Add(this.label45);
+            this.groupBox_channel_3.Controls.Add(this.tBox_CH3_SF);
             this.groupBox_channel_3.Controls.Add(this.label39);
             this.groupBox_channel_3.Controls.Add(this.label16);
             this.groupBox_channel_3.Controls.Add(this.tBox_CH3_FOGID);
@@ -455,7 +471,7 @@
             this.groupBox_channel_3.Enabled = false;
             this.groupBox_channel_3.Location = new System.Drawing.Point(1058, 34);
             this.groupBox_channel_3.Name = "groupBox_channel_3";
-            this.groupBox_channel_3.Size = new System.Drawing.Size(236, 336);
+            this.groupBox_channel_3.Size = new System.Drawing.Size(236, 381);
             this.groupBox_channel_3.TabIndex = 5;
             this.groupBox_channel_3.TabStop = false;
             this.groupBox_channel_3.Text = "通道三";
@@ -594,7 +610,9 @@
             // 
             // groupBox_channel_4
             // 
+            this.groupBox_channel_4.Controls.Add(this.label46);
             this.groupBox_channel_4.Controls.Add(this.label40);
+            this.groupBox_channel_4.Controls.Add(this.tBox_CH4_SF);
             this.groupBox_channel_4.Controls.Add(this.label21);
             this.groupBox_channel_4.Controls.Add(this.tBox_CH4_FOGID);
             this.groupBox_channel_4.Controls.Add(this.cBox_CH4_ParityBit);
@@ -607,9 +625,9 @@
             this.groupBox_channel_4.Controls.Add(this.label25);
             this.groupBox_channel_4.Controls.Add(this.cBox_CH4_COMID);
             this.groupBox_channel_4.Enabled = false;
-            this.groupBox_channel_4.Location = new System.Drawing.Point(40, 392);
+            this.groupBox_channel_4.Location = new System.Drawing.Point(40, 438);
             this.groupBox_channel_4.Name = "groupBox_channel_4";
-            this.groupBox_channel_4.Size = new System.Drawing.Size(236, 348);
+            this.groupBox_channel_4.Size = new System.Drawing.Size(236, 381);
             this.groupBox_channel_4.TabIndex = 5;
             this.groupBox_channel_4.TabStop = false;
             this.groupBox_channel_4.Text = "通道四";
@@ -749,7 +767,7 @@
             // Btn_OK
             // 
             this.Btn_OK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.Btn_OK.Location = new System.Drawing.Point(1058, 625);
+            this.Btn_OK.Location = new System.Drawing.Point(1058, 671);
             this.Btn_OK.Name = "Btn_OK";
             this.Btn_OK.Size = new System.Drawing.Size(94, 50);
             this.Btn_OK.TabIndex = 6;
@@ -760,7 +778,7 @@
             // Btn_Cancel
             // 
             this.Btn_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.Btn_Cancel.Location = new System.Drawing.Point(1200, 625);
+            this.Btn_Cancel.Location = new System.Drawing.Point(1200, 671);
             this.Btn_Cancel.Name = "Btn_Cancel";
             this.Btn_Cancel.Size = new System.Drawing.Size(94, 50);
             this.Btn_Cancel.TabIndex = 6;
@@ -769,6 +787,8 @@
             // 
             // groupBox_channel_5
             // 
+            this.groupBox_channel_5.Controls.Add(this.label47);
+            this.groupBox_channel_5.Controls.Add(this.tBox_CH5_SF);
             this.groupBox_channel_5.Controls.Add(this.label41);
             this.groupBox_channel_5.Controls.Add(this.label26);
             this.groupBox_channel_5.Controls.Add(this.tBox_CH5_FOGID);
@@ -782,12 +802,21 @@
             this.groupBox_channel_5.Controls.Add(this.label30);
             this.groupBox_channel_5.Controls.Add(this.cBox_CH5_COMID);
             this.groupBox_channel_5.Enabled = false;
-            this.groupBox_channel_5.Location = new System.Drawing.Point(376, 392);
+            this.groupBox_channel_5.Location = new System.Drawing.Point(376, 438);
             this.groupBox_channel_5.Name = "groupBox_channel_5";
-            this.groupBox_channel_5.Size = new System.Drawing.Size(236, 348);
+            this.groupBox_channel_5.Size = new System.Drawing.Size(236, 381);
             this.groupBox_channel_5.TabIndex = 6;
             this.groupBox_channel_5.TabStop = false;
             this.groupBox_channel_5.Text = "通道五";
+            // 
+            // label41
+            // 
+            this.label41.AutoSize = true;
+            this.label41.Location = new System.Drawing.Point(1, 47);
+            this.label41.Name = "label41";
+            this.label41.Size = new System.Drawing.Size(80, 18);
+            this.label41.TabIndex = 32;
+            this.label41.Text = "陀螺编号";
             // 
             // label26
             // 
@@ -798,6 +827,14 @@
             this.label26.Size = new System.Drawing.Size(62, 18);
             this.label26.TabIndex = 26;
             this.label26.Text = "校验位";
+            // 
+            // tBox_CH5_FOGID
+            // 
+            this.tBox_CH5_FOGID.Location = new System.Drawing.Point(101, 43);
+            this.tBox_CH5_FOGID.Name = "tBox_CH5_FOGID";
+            this.tBox_CH5_FOGID.Size = new System.Drawing.Size(121, 28);
+            this.tBox_CH5_FOGID.TabIndex = 31;
+            this.tBox_CH5_FOGID.Text = "CH5";
             // 
             // cBox_CH5_ParityBit
             // 
@@ -906,7 +943,9 @@
             // 
             // groupBox_channel_2
             // 
+            this.groupBox_channel_2.Controls.Add(this.label44);
             this.groupBox_channel_2.Controls.Add(this.label38);
+            this.groupBox_channel_2.Controls.Add(this.tBox_CH2_SF);
             this.groupBox_channel_2.Controls.Add(this.label11);
             this.groupBox_channel_2.Controls.Add(this.tBox_CH2_FOGID);
             this.groupBox_channel_2.Controls.Add(this.cBox_CH2_ParityBit);
@@ -921,7 +960,7 @@
             this.groupBox_channel_2.Enabled = false;
             this.groupBox_channel_2.Location = new System.Drawing.Point(728, 34);
             this.groupBox_channel_2.Name = "groupBox_channel_2";
-            this.groupBox_channel_2.Size = new System.Drawing.Size(236, 336);
+            this.groupBox_channel_2.Size = new System.Drawing.Size(236, 381);
             this.groupBox_channel_2.TabIndex = 7;
             this.groupBox_channel_2.TabStop = false;
             this.groupBox_channel_2.Text = "通道二";
@@ -1072,7 +1111,7 @@
             "通道四",
             "通道五",
             "通道六"});
-            this.checkedListBox_Channel.Location = new System.Drawing.Point(1077, 403);
+            this.checkedListBox_Channel.Location = new System.Drawing.Point(1077, 449);
             this.checkedListBox_Channel.Name = "checkedListBox_Channel";
             this.checkedListBox_Channel.Size = new System.Drawing.Size(153, 175);
             this.checkedListBox_Channel.TabIndex = 8;
@@ -1080,7 +1119,9 @@
             // 
             // groupBox_channel_6
             // 
+            this.groupBox_channel_6.Controls.Add(this.label48);
             this.groupBox_channel_6.Controls.Add(this.label42);
+            this.groupBox_channel_6.Controls.Add(this.tBox_CH6_SF);
             this.groupBox_channel_6.Controls.Add(this.label31);
             this.groupBox_channel_6.Controls.Add(this.cBox_CH6_ParityBit);
             this.groupBox_channel_6.Controls.Add(this.tBox_CH6_FOGID);
@@ -1093,12 +1134,21 @@
             this.groupBox_channel_6.Controls.Add(this.label35);
             this.groupBox_channel_6.Controls.Add(this.cBox_CH6_COMID);
             this.groupBox_channel_6.Enabled = false;
-            this.groupBox_channel_6.Location = new System.Drawing.Point(728, 392);
+            this.groupBox_channel_6.Location = new System.Drawing.Point(728, 438);
             this.groupBox_channel_6.Name = "groupBox_channel_6";
-            this.groupBox_channel_6.Size = new System.Drawing.Size(236, 348);
+            this.groupBox_channel_6.Size = new System.Drawing.Size(236, 381);
             this.groupBox_channel_6.TabIndex = 27;
             this.groupBox_channel_6.TabStop = false;
             this.groupBox_channel_6.Text = "通道六";
+            // 
+            // label42
+            // 
+            this.label42.AutoSize = true;
+            this.label42.Location = new System.Drawing.Point(9, 48);
+            this.label42.Name = "label42";
+            this.label42.Size = new System.Drawing.Size(80, 18);
+            this.label42.TabIndex = 32;
+            this.label42.Text = "陀螺编号";
             // 
             // label31
             // 
@@ -1121,6 +1171,14 @@
             this.cBox_CH6_ParityBit.Name = "cBox_CH6_ParityBit";
             this.cBox_CH6_ParityBit.Size = new System.Drawing.Size(121, 26);
             this.cBox_CH6_ParityBit.TabIndex = 4;
+            // 
+            // tBox_CH6_FOGID
+            // 
+            this.tBox_CH6_FOGID.Location = new System.Drawing.Point(95, 43);
+            this.tBox_CH6_FOGID.Name = "tBox_CH6_FOGID";
+            this.tBox_CH6_FOGID.Size = new System.Drawing.Size(121, 28);
+            this.tBox_CH6_FOGID.TabIndex = 31;
+            this.tBox_CH6_FOGID.Text = "CH6";
             // 
             // label32
             // 
@@ -1215,46 +1273,120 @@
             this.cBox_CH6_COMID.Size = new System.Drawing.Size(121, 26);
             this.cBox_CH6_COMID.TabIndex = 0;
             // 
-            // label41
+            // tBox_CH1_SF
             // 
-            this.label41.AutoSize = true;
-            this.label41.Location = new System.Drawing.Point(1, 47);
-            this.label41.Name = "label41";
-            this.label41.Size = new System.Drawing.Size(80, 18);
-            this.label41.TabIndex = 32;
-            this.label41.Text = "陀螺编号";
+            this.tBox_CH1_SF.Location = new System.Drawing.Point(101, 337);
+            this.tBox_CH1_SF.Name = "tBox_CH1_SF";
+            this.tBox_CH1_SF.Size = new System.Drawing.Size(121, 28);
+            this.tBox_CH1_SF.TabIndex = 24;
+            this.tBox_CH1_SF.Text = "4200000";
             // 
-            // tBox_CH5_FOGID
+            // label43
             // 
-            this.tBox_CH5_FOGID.Location = new System.Drawing.Point(101, 43);
-            this.tBox_CH5_FOGID.Name = "tBox_CH5_FOGID";
-            this.tBox_CH5_FOGID.Size = new System.Drawing.Size(121, 28);
-            this.tBox_CH5_FOGID.TabIndex = 31;
-            this.tBox_CH5_FOGID.Text = "CH5";
+            this.label43.AutoSize = true;
+            this.label43.Location = new System.Drawing.Point(10, 340);
+            this.label43.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label43.Name = "label43";
+            this.label43.Size = new System.Drawing.Size(80, 18);
+            this.label43.TabIndex = 25;
+            this.label43.Text = "标度因数";
             // 
-            // tBox_CH6_FOGID
+            // label44
             // 
-            this.tBox_CH6_FOGID.Location = new System.Drawing.Point(95, 43);
-            this.tBox_CH6_FOGID.Name = "tBox_CH6_FOGID";
-            this.tBox_CH6_FOGID.Size = new System.Drawing.Size(121, 28);
-            this.tBox_CH6_FOGID.TabIndex = 31;
-            this.tBox_CH6_FOGID.Text = "CH6";
+            this.label44.AutoSize = true;
+            this.label44.Location = new System.Drawing.Point(4, 340);
+            this.label44.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label44.Name = "label44";
+            this.label44.Size = new System.Drawing.Size(80, 18);
+            this.label44.TabIndex = 27;
+            this.label44.Text = "标度因数";
             // 
-            // label42
+            // tBox_CH2_SF
             // 
-            this.label42.AutoSize = true;
-            this.label42.Location = new System.Drawing.Point(9, 48);
-            this.label42.Name = "label42";
-            this.label42.Size = new System.Drawing.Size(80, 18);
-            this.label42.TabIndex = 32;
-            this.label42.Text = "陀螺编号";
+            this.tBox_CH2_SF.Location = new System.Drawing.Point(95, 337);
+            this.tBox_CH2_SF.Name = "tBox_CH2_SF";
+            this.tBox_CH2_SF.Size = new System.Drawing.Size(121, 28);
+            this.tBox_CH2_SF.TabIndex = 26;
+            this.tBox_CH2_SF.Text = "4200000";
+            // 
+            // label45
+            // 
+            this.label45.AutoSize = true;
+            this.label45.Location = new System.Drawing.Point(6, 340);
+            this.label45.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label45.Name = "label45";
+            this.label45.Size = new System.Drawing.Size(80, 18);
+            this.label45.TabIndex = 30;
+            this.label45.Text = "标度因数";
+            // 
+            // tBox_CH3_SF
+            // 
+            this.tBox_CH3_SF.Location = new System.Drawing.Point(97, 337);
+            this.tBox_CH3_SF.Name = "tBox_CH3_SF";
+            this.tBox_CH3_SF.Size = new System.Drawing.Size(121, 28);
+            this.tBox_CH3_SF.TabIndex = 29;
+            this.tBox_CH3_SF.Text = "4200000";
+            // 
+            // label46
+            // 
+            this.label46.AutoSize = true;
+            this.label46.Location = new System.Drawing.Point(8, 343);
+            this.label46.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label46.Name = "label46";
+            this.label46.Size = new System.Drawing.Size(80, 18);
+            this.label46.TabIndex = 29;
+            this.label46.Text = "标度因数";
+            // 
+            // tBox_CH4_SF
+            // 
+            this.tBox_CH4_SF.Location = new System.Drawing.Point(99, 340);
+            this.tBox_CH4_SF.Name = "tBox_CH4_SF";
+            this.tBox_CH4_SF.Size = new System.Drawing.Size(121, 28);
+            this.tBox_CH4_SF.TabIndex = 28;
+            this.tBox_CH4_SF.Text = "4200000";
+            // 
+            // label47
+            // 
+            this.label47.AutoSize = true;
+            this.label47.Location = new System.Drawing.Point(10, 343);
+            this.label47.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label47.Name = "label47";
+            this.label47.Size = new System.Drawing.Size(80, 18);
+            this.label47.TabIndex = 34;
+            this.label47.Text = "标度因数";
+            // 
+            // tBox_CH5_SF
+            // 
+            this.tBox_CH5_SF.Location = new System.Drawing.Point(101, 340);
+            this.tBox_CH5_SF.Name = "tBox_CH5_SF";
+            this.tBox_CH5_SF.Size = new System.Drawing.Size(121, 28);
+            this.tBox_CH5_SF.TabIndex = 33;
+            this.tBox_CH5_SF.Text = "4200000";
+            // 
+            // label48
+            // 
+            this.label48.AutoSize = true;
+            this.label48.Location = new System.Drawing.Point(4, 343);
+            this.label48.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label48.Name = "label48";
+            this.label48.Size = new System.Drawing.Size(80, 18);
+            this.label48.TabIndex = 29;
+            this.label48.Text = "标度因数";
+            // 
+            // tBox_CH6_SF
+            // 
+            this.tBox_CH6_SF.Location = new System.Drawing.Point(95, 340);
+            this.tBox_CH6_SF.Name = "tBox_CH6_SF";
+            this.tBox_CH6_SF.Size = new System.Drawing.Size(121, 28);
+            this.tBox_CH6_SF.TabIndex = 28;
+            this.tBox_CH6_SF.Text = "4200000";
             // 
             // SerialCfgDlg
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.ClientSize = new System.Drawing.Size(1368, 752);
+            this.ClientSize = new System.Drawing.Size(1368, 855);
             this.Controls.Add(this.groupBox_channel_6);
             this.Controls.Add(this.checkedListBox_Channel);
             this.Controls.Add(this.groupBox_channel_5);
@@ -1381,5 +1513,17 @@
         private System.Windows.Forms.TextBox tBox_CH5_FOGID;
         private System.Windows.Forms.Label label42;
         private System.Windows.Forms.TextBox tBox_CH6_FOGID;
+        private System.Windows.Forms.Label label43;
+        private System.Windows.Forms.TextBox tBox_CH1_SF;
+        private System.Windows.Forms.Label label45;
+        private System.Windows.Forms.TextBox tBox_CH3_SF;
+        private System.Windows.Forms.Label label46;
+        private System.Windows.Forms.TextBox tBox_CH4_SF;
+        private System.Windows.Forms.Label label47;
+        private System.Windows.Forms.TextBox tBox_CH5_SF;
+        private System.Windows.Forms.Label label44;
+        private System.Windows.Forms.TextBox tBox_CH2_SF;
+        private System.Windows.Forms.Label label48;
+        private System.Windows.Forms.TextBox tBox_CH6_SF;
     }
 }

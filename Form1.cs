@@ -38,48 +38,23 @@ namespace FOGTestPlatform
         #region 全局变量声明
         //通道串口声明
         SerialPort table_serial = new SerialPort();
-        SerialPort ch1_serial = new SerialPort();
-        SerialPort ch2_serial = new SerialPort();
-        SerialPort ch3_serial = new SerialPort();
-        SerialPort ch4_serial = new SerialPort();
-        SerialPort ch5_serial = new SerialPort();
-        SerialPort ch6_serial = new SerialPort();
-        
+        List<SerialPort> channels_serial_list = new List<SerialPort>();
         //保存文件流声明
-        StreamWriter CH1_HEX_SW;
-        StreamWriter CH2_HEX_SW;
-        StreamWriter CH3_HEX_SW;
-        StreamWriter CH4_HEX_SW;
-        StreamWriter CH5_HEX_SW;
-        StreamWriter CH6_HEX_SW;
-
-        StreamWriter CH1_data_SW;
-        StreamWriter CH2_data_SW;
-        StreamWriter CH3_data_SW;
-        StreamWriter CH4_data_SW;
-        StreamWriter CH5_data_SW;
-        StreamWriter CH6_data_SW;
+        List<StreamWriter> Channels_Hex_SW_list = new List<StreamWriter>();
+        List<StreamWriter> Channels_Data_SW_list = new List<StreamWriter>();
+        List<string> Channels_portName_list = new List<string>();
+        List<Fogdata> Channels_FogData_list = new List<Fogdata>();
 
         SerialData table_serialData = new SerialData();
-        SerialData CH1_serialData = new SerialData();
-        SerialData CH2_serialData = new SerialData();
-        SerialData CH3_serialData = new SerialData();
-        SerialData CH4_serialData = new SerialData();
-        SerialData CH5_serialData = new SerialData();
-        SerialData CH6_serialData = new SerialData();
 
-
-        Fogdata CH1_FogData = new Fogdata();
-        Fogdata CH2_FogData = new Fogdata();
-        Fogdata CH3_FogData = new Fogdata();
-        Fogdata CH4_FogData = new Fogdata();
-        Fogdata CH5_FogData = new Fogdata();
-        Fogdata CH6_FogData = new Fogdata();
 
         //参数类对象声明
         TestCfgPara testCfgPara = new TestCfgPara();
         TableData tabledata = new TableData();
         TimePara timePara = new TimePara();
+        List<string> portIDList = new List<string>();
+        
+
         //定义委托
         delegate void UpdateTableFrmEventHandle();
         delegate void UpdateDataFrmEventHandle(string portName);
@@ -109,6 +84,9 @@ namespace FOGTestPlatform
             InitializeComponent();
             InitializeConfigFlie();
             IntializeChart();
+            timePara.testTimes = 0;
+            timePara.drawCount = 0;
+
             updateTableFrmdata += new UpdateTableFrmEventHandle(showtabledata);
             updateDataFrm += new UpdateDataFrmEventHandle(showFogdata);
         }
@@ -122,7 +100,7 @@ namespace FOGTestPlatform
         public void InitializeConfigFlie()
         {
             string timedata = DateTime.Now.ToString("yyyyMMdd-HHmmss");
-            FilePara.CurrentDirectory = FilePara.BaseDirectory + timedata;
+            FilePara.CurrentDirectory = FilePara.BaseDirectory + @"FogData" + timedata;
             Directory.CreateDirectory(FilePara.CurrentDirectory);
             try
             {
@@ -138,7 +116,7 @@ namespace FOGTestPlatform
                 sheet.GetRow(0).CreateCell(5).SetCellValue("停止位");
                 sheet.GetRow(0).CreateCell(6).SetCellValue("校验位");
                 sheet.GetRow(0).CreateCell(7).SetCellValue("型号");
-                sheet.GetRow(0).CreateCell(7).SetCellValue("标度因数");
+                sheet.GetRow(0).CreateCell(8).SetCellValue("标度因数");
 
                 sheet.CreateRow(1).CreateCell(0).SetCellValue("转台通道");
                 sheet.CreateRow(2).CreateCell(0).SetCellValue("通道一");
@@ -156,7 +134,7 @@ namespace FOGTestPlatform
             catch (Exception)
             {
 
-                MessageBox.Show("配置文件生产异常！");
+                MessageBox.Show("配置文件产生异常！");
                 //throw;
             }
                  
@@ -242,11 +220,11 @@ namespace FOGTestPlatform
             series.ChartType = SeriesChartType.Line;
             if (index % 2 == 0)
             {
-                series.Color = Color.FromArgb(0xff, 0x32, 0xc5, 0xe9);
+                series.Color = Color.FromArgb(0xff, 0x32, 0xc5, 0xe9);//设置数据曲线的颜色
             }
             else
             {
-                series.Color = Color.FromArgb(0xff, 0xff, 0x9f, 0x7f);
+                series.Color = Color.FromArgb(0xff, 0xff, 0x9f, 0x7f);//设置温度曲线的颜色
             }
             //Series线条阴影颜色
             series.ShadowColor = Color.Green;
@@ -279,42 +257,20 @@ namespace FOGTestPlatform
         {
             ChartArea chartArea = new ChartArea();
 
-            switch (index+1)
-            {
-                case 1:
-                    chartArea.Name = ("CH1");
-                    break;
-                case 2:
-                    chartArea.Name = ("CH2");
-                    break;
-                case 3:
-                    chartArea.Name = ("CH3");
-                    break;
-                case 4:
-                    chartArea.Name = ("CH4");
-                    break;
-                case 5:
-                    chartArea.Name = ("CH5");
-                    break;
-                case 6:
-                    chartArea.Name = ("CH6");
-                    break;
-                default:
-                    MessageBox.Show("图表数目参数错误！");
-                    break;
-            }
+            chartArea.Name = Channels_FogData_list[index].FOG_Channel;
+            
             //背景色
-            chartArea.BackColor = Color.FromArgb(255, 4, 33, 65);
+            chartArea.BackColor         = Color.FromArgb(255, 4, 33, 65);
             //背景渐变方式
             chartArea.BackGradientStyle = GradientStyle.None;
             //边框颜色
-            chartArea.BorderColor = Color.FromArgb(255, 4, 33, 65);
+            chartArea.BorderColor       = Color.FromArgb(255, 4, 33, 65);
             //边框柱线条宽度
-            chartArea.BorderWidth = 2;
+            chartArea.BorderWidth       = 2;
             //边框线条样式
-            chartArea.BorderDashStyle = ChartDashStyle.Solid;
+            chartArea.BorderDashStyle   = ChartDashStyle.Solid;
             //阴影颜色
-            chartArea.ShadowColor = Color.Transparent;
+            chartArea.ShadowColor       = Color.Transparent;
 
 
             //设置X轴和Y轴线条的颜色和宽度
@@ -323,14 +279,14 @@ namespace FOGTestPlatform
             chartArea.AxisY.LineColor = Color.Black;//.FromArgb(64, 64, 64, 64);//
             chartArea.AxisY.LineWidth = 1;
             //设置x轴和Y轴的标题
-            chartArea.AxisX.Title = "时间";
-            chartArea.AxisY.Title = "陀螺数据";
-            chartArea.AxisY2.Title = "温度";
-            chartArea.AxisX.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 12, FontStyle.Regular);
-            chartArea.AxisY.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10, FontStyle.Regular);
-            chartArea.AxisY2.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 12, FontStyle.Regular);
-            chartArea.AxisX.TitleForeColor = Color.FromArgb(255, 245, 254, 252);
-            chartArea.AxisY.TitleForeColor = Color.FromArgb(0xff, 0x32, 0xc5, 0xe9);
+            chartArea.AxisX.Title           = "时间";
+            chartArea.AxisY.Title           = Channels_FogData_list[index].FOG_Channel + "_" + Channels_FogData_list[index].FOGID + "_陀螺数据";
+            chartArea.AxisY2.Title          = "温度";
+            chartArea.AxisX.TitleFont       = new System.Drawing.Font("Microsoft Sans Serif", 12, FontStyle.Regular);
+            chartArea.AxisY.TitleFont       = new System.Drawing.Font("Microsoft Sans Serif", 10, FontStyle.Regular);
+            chartArea.AxisY2.TitleFont      = new System.Drawing.Font("Microsoft Sans Serif", 12, FontStyle.Regular);
+            chartArea.AxisX.TitleForeColor  = Color.FromArgb(255, 245, 254, 252);
+            chartArea.AxisY.TitleForeColor  = Color.FromArgb(0xff, 0x32, 0xc5, 0xe9);
             chartArea.AxisY2.TitleForeColor = Color.FromArgb(0xff, 0xff, 0x9f, 0x7f);
             //设置图表区网格横纵线条的颜色和宽度
             chartArea.AxisX.MajorGrid.LineColor = Color.FromArgb(255, 114, 175, 207);
@@ -339,23 +295,49 @@ namespace FOGTestPlatform
             chartArea.AxisY.MajorGrid.LineWidth = 1;
 
             //启用X游标，以支持局部区域选择放大
-            chartArea.CursorX.IsUserEnabled = true;
+            chartArea.CursorX.IsUserEnabled          = true;
             chartArea.CursorX.IsUserSelectionEnabled = true;
-            chartArea.CursorX.LineColor = Color.Pink;
-            chartArea.CursorX.IntervalType = DateTimeIntervalType.Auto;
-            chartArea.AxisX.ScaleView.Zoomable = false;
-            chartArea.AxisX.ScrollBar.ButtonStyle = ScrollBarButtonStyles.All;//启用X轴滚动条按钮
-            chartArea.AxisY.ScaleView.Zoomable = false;
+            chartArea.CursorX.LineColor              = Color.Pink;
+            chartArea.CursorX.IntervalType           = DateTimeIntervalType.Auto;
+            chartArea.AxisX.ScaleView.Zoomable       = false;
+            chartArea.AxisX.ScrollBar.ButtonStyle    = ScrollBarButtonStyles.All;//启用X轴滚动条按钮
+            chartArea.AxisY.ScaleView.Zoomable       = false;
 
-            chartArea.AxisY.LabelStyle.Format = "##########.0";
-            chartArea.AxisY2.LabelStyle.Format = "###.0000";
-            chartArea.AxisY.LabelStyle.ForeColor = Color.FromArgb(255, 146, 175, 207);
-            chartArea.AxisY2.LabelStyle.ForeColor = Color.FromArgb(255, 146, 175, 207);
-            chartArea.AxisX.LabelStyle.ForeColor = Color.FromArgb(255, 151, 167, 186);
+            chartArea.AxisY.LabelStyle.Format        = "##########.0";
+            chartArea.AxisY2.LabelStyle.Format       = "###.0000";
+            chartArea.AxisY.LabelStyle.ForeColor     = Color.FromArgb(255, 146, 175, 207);
+            chartArea.AxisY2.LabelStyle.ForeColor    = Color.FromArgb(255, 146, 175, 207);
+            chartArea.AxisX.LabelStyle.ForeColor     = Color.FromArgb(255, 151, 167, 186);
 
             return chartArea;
         }
+        private void DrawFogData(string portName)
+        {
+            timePara.drawCount++;
+            if (timePara.drawCount >= portIDList.Count)
+            {
+                int index = portIDList.IndexOf(portName);
+                timePara.drawIndexTime[index]++;
+                if (!Channels_FogData_list[index].zoomed_flag)
+                {
+                    chart.ChartAreas[index].AxisY.Maximum  = Channels_FogData_list[index].fdata_1s_array.Max() + 100;
+                    chart.ChartAreas[index].AxisY.Minimum  = Channels_FogData_list[index].fdata_1s_array.Min() - 100;
+                    chart.ChartAreas[index].AxisY2.Maximum = Channels_FogData_list[index].tdata_1s_array.Max() + 1;
+                    chart.ChartAreas[index].AxisY2.Minimum = Channels_FogData_list[index].tdata_1s_array.Min() - 1;
 
+                    chart.ChartAreas[index].AxisX.Interval           = (Channels_FogData_list[index].fdata_1s_array.Count / 10 + 1);
+                    chart.ChartAreas[index].AxisX.ScaleView.Size     = Channels_FogData_list[index].fdata_1s_array.Count * 1.1;
+                    chart.ChartAreas[index].AxisX.ScaleView.Position = 0.0;
+                    chart.ChartAreas[index].CursorX.SelectionStart   = chart.ChartAreas[index].CursorX.SelectionEnd = 0.0;
+                    chart.ChartAreas[index].CursorX.Position         = -1;
+
+                }
+                chart.Series[2 * index].ChartArea = chart.ChartAreas[index].Name;
+                chart.Series[2 * index + 1].ChartArea = chart.ChartAreas[index].Name;
+                chart.Series[2 * index].Points.AddXY(timePara.drawIndexTime[index], Channels_FogData_list[index].d_fdata_1s);
+                chart.Series[2 * index+1].Points.AddXY(timePara.drawIndexTime[index], Channels_FogData_list[index].d_tdata_1s);
+            }
+        }
         /*************************************
         函数名：ToolStripMenuItem_SerialCfgByDialog_Click
         创建日期：2019/10/22
@@ -368,130 +350,103 @@ namespace FOGTestPlatform
         private void ToolStripMenuItem_SerialCfgByDialog_Click(object sender, EventArgs e)
         {
             SerialCfgDlg serialCfgDlg = new SerialCfgDlg();
-            List<string> portIDList = new List<string>();
+
             if (serialCfgDlg.ShowDialog() != DialogResult.Cancel)
             {
-                //读入配置文件
-                FileStream rfile = new FileStream(FilePara.ConfigFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                XSSFWorkbook workbook = new XSSFWorkbook(rfile);
-                rfile.Close();
-                ISheet sht = workbook.GetSheet("通道串口配置");
-                if (sht.GetRow(1).GetCell(1).ToString() == "True")
-                {
-                    table_serial = SetSerialPara(0);
-                    testCfgPara.serialportEnable[0] = true;
-                    portIDList.Add(sht.GetRow(1).GetCell(2).ToString());
-                }
-                else
-                {
-                    testCfgPara.serialportEnable[0] = false;
-                }
-
-                if (sht.GetRow(2).GetCell(1).ToString() == "True")
-                {
-                    ch1_serial = SetSerialPara(1);
-                    testCfgPara.serialportEnable[1] = true;
-                    portIDList.Add(sht.GetRow(2).GetCell(2).ToString());
-                    CH1_HEX_SW = new StreamWriter(FilePara.CurrentDirectory + @"\" + sht.GetRow(2).GetCell(7).ToString() +"HexData.dat");
-                    CH1_data_SW = new StreamWriter(FilePara.CurrentDirectory + @"\" + sht.GetRow(2).GetCell(7).ToString() + "Data.dat");
-                }
-                else
-                {
-                    testCfgPara.serialportEnable[1] = false;
-                }
-
-                if (sht.GetRow(3).GetCell(1).ToString() == "True")
-                {
-                    ch2_serial = SetSerialPara(2);
-                    testCfgPara.serialportEnable[2] = true;
-                    portIDList.Add(sht.GetRow(3).GetCell(2).ToString());
-                    CH2_HEX_SW  = new StreamWriter(FilePara.CurrentDirectory + @"\" + sht.GetRow(3).GetCell(7).ToString() + "HexData.dat");
-                    CH2_data_SW = new StreamWriter(FilePara.CurrentDirectory + @"\" + sht.GetRow(3).GetCell(7).ToString() + "Data.dat");
-                }
-                else
-                {
-                    testCfgPara.serialportEnable[2] = false;
-                }
-
-                if (sht.GetRow(4).GetCell(1).ToString() == "True")
-                {
-                    ch3_serial = SetSerialPara(3);
-                    testCfgPara.serialportEnable[3] = true;
-                    portIDList.Add(sht.GetRow(4).GetCell(2).ToString());
-                    CH3_HEX_SW  = new StreamWriter(FilePara.CurrentDirectory + @"\" + sht.GetRow(4).GetCell(7).ToString() + "HexData.dat");
-                    CH3_data_SW = new StreamWriter(FilePara.CurrentDirectory + @"\" + sht.GetRow(4).GetCell(7).ToString() + "Data.dat");
-                }
-                else
-                {
-                    testCfgPara.serialportEnable[3] = false;
-                }
-
-                if (sht.GetRow(5).GetCell(1).ToString() == "True")
-                {
-                    ch4_serial = SetSerialPara(4);
-                    testCfgPara.serialportEnable[4] = true;
-                    portIDList.Add(sht.GetRow(5).GetCell(2).ToString());
-                    CH4_HEX_SW  = new StreamWriter(FilePara.CurrentDirectory + @"\" + sht.GetRow(5).GetCell(7).ToString() + "HexData.dat");
-                    CH4_data_SW = new StreamWriter(FilePara.CurrentDirectory + @"\" + sht.GetRow(5).GetCell(7).ToString() + "Data.dat");
-                }
-                else
-                {
-                    testCfgPara.serialportEnable[4] = false;
-                }
-
-                if (sht.GetRow(6).GetCell(1).ToString() == "True")
-                {
-                    ch5_serial = SetSerialPara(5);
-                    testCfgPara.serialportEnable[5] = true;
-                    portIDList.Add(sht.GetRow(6).GetCell(2).ToString());
-                    CH5_HEX_SW  = new StreamWriter(FilePara.CurrentDirectory + @"\" + sht.GetRow(6).GetCell(7).ToString() + "HexData.dat");
-                    CH5_data_SW = new StreamWriter(FilePara.CurrentDirectory + @"\" + sht.GetRow(6).GetCell(7).ToString() + "Data.dat");
-                }
-                else
-                {
-                    testCfgPara.serialportEnable[5] = false;
-                }
-
-
-                if (sht.GetRow(7).GetCell(1).ToString() == "True")
-                {
-                    ch6_serial = SetSerialPara(6);
-                    testCfgPara.serialportEnable[6] = true;
-                    portIDList.Add(sht.GetRow(6).GetCell(2).ToString());
-                    CH6_HEX_SW  = new StreamWriter(FilePara.CurrentDirectory + @"\" + sht.GetRow(7).GetCell(7).ToString() + "HexData.dat");
-                    CH6_data_SW = new StreamWriter(FilePara.CurrentDirectory + @"\" + sht.GetRow(7).GetCell(7).ToString() + "Data.dat");
-                }
-                else
-                {
-                    testCfgPara.serialportEnable[6] = false;
-                }
-                HashSet<string> PortIDHashset = new HashSet<string>(portIDList);
-                if (portIDList.Count() != PortIDHashset.Count())
-                {
-                    MessageBox.Show("不同通道选用了相同的串口号，请重新配置串口！");
-                    Btn_Start.Enabled = false;
-
-                }
-                else
-                {
-                    testCfgPara.numOftestChannels = Convert.ToInt32(sht.GetRow(8).GetCell(1).ToString());
-                    AddChartArea(testCfgPara.numOftestChannels);
-                    AddSeries(testCfgPara.numOftestChannels);
-                    Btn_Start.Enabled = true;
-                }
-                
+                ConfigSerialPort();
             }
         }
-        public SerialPort SetSerialPara(int index)
+        
+        /*************************************
+        函数名：ConfigSerialPort
+        创建日期：2019/11/06
+        函数功能：通过配置文件
+        函数参数：
+        返回值：void
+        *************************************/
+        private void ConfigSerialPort()
+        {
+            //读入配置文件
+            FileStream rfile = new FileStream(FilePara.ConfigFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            XSSFWorkbook workbook = new XSSFWorkbook(rfile);
+            rfile.Close();
+            ISheet sht = workbook.GetSheet("通道串口配置");
+            //配置转台参数
+            if (sht.GetRow(1).GetCell(1).ToString() == "True")
+            {
+                table_serial = SetSerialPara(0, sht);
+                testCfgPara.serialportEnable[0] = true;
+                portIDList.Add(sht.GetRow(1).GetCell(2).ToString());
+            }
+            else
+            {
+                testCfgPara.serialportEnable[0] = false;
+            }
+
+            //配置各通道参数
+            for (int i = 1; i <= 6; i++)
+            {
+                if (sht.GetRow(i + 1).GetCell(1).ToString() == "True")
+                {
+                    SetChannelPara(i, sht, portIDList);
+                }
+                else
+                {
+                    testCfgPara.serialportEnable[i] = false;
+                }
+            }
+
+            HashSet<string> PortIDHashset = new HashSet<string>(portIDList);
+            if (portIDList.Count() != PortIDHashset.Count())
+            {
+                MessageBox.Show("不同通道选用了相同的串口号，请重新配置串口！");
+                Btn_Start.Enabled = false;
+
+            }
+            else
+            {
+                testCfgPara.numOftestChannels = Convert.ToInt32(sht.GetRow(8).GetCell(1).ToString());
+                AddChartArea(testCfgPara.numOftestChannels);
+                AddSeries(testCfgPara.numOftestChannels);
+                Btn_Start.Enabled = true;
+                Btn_Stop.Enabled = false;
+            }
+        }
+        /*************************************
+        函数名：SetChannelPara
+        创建日期：2019/11/06
+        函数功能：配置通道参数
+        函数参数：
+        channelID
+        sht
+        portIDList
+        返回值：void
+        *************************************/
+        private void SetChannelPara(int channelID, ISheet sht, List<string> portIDList)
+        {
+            Fogdata fogdata = new Fogdata();
+            channels_serial_list.Add(SetSerialPara(channelID, sht));
+            testCfgPara.serialportEnable[channelID] = true;
+            portIDList.Add(sht.GetRow(channelID+1).GetCell(2).ToString());
+            fogdata.FOGID = sht.GetRow(channelID + 1).GetCell(7).ToString();
+            fogdata.FOG_Channel = sht.GetRow(channelID + 1).GetCell(0).ToString();
+            fogdata.scaleFactor = Convert.ToDouble(sht.GetRow(channelID + 1).GetCell(8).ToString());
+            fogdata.Fog_PortName = sht.GetRow(channelID + 1).GetCell(2).ToString();
+            Channels_FogData_list.Add(fogdata);
+        }
+        /*************************************
+        函数名：SetSerialPara
+        创建日期：2019/11/02
+        函数功能：设置串口参数
+        函数参数：
+        index
+        返回值：System.IO.Ports.SerialPort
+        *************************************/
+        public SerialPort SetSerialPara(int index,ISheet sht)
         {
             SerialPort serial          = new SerialPort();
             SerialParameter serialpara = new SerialParameter();
-            //读入配置文件
-            FileStream rfile      = new FileStream(FilePara.ConfigFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            XSSFWorkbook workbook = new XSSFWorkbook(rfile);
-            rfile.Close();
-
-            ISheet sht           = workbook.GetSheet("通道串口配置");
+            
             serialpara.comName   = sht.GetRow(index + 1).GetCell(2).ToString();
             serialpara.baudRate  = sht.GetRow(index + 1).GetCell(3).ToString();
             serialpara.dataBit   = sht.GetRow(index + 1).GetCell(4).ToString();
@@ -555,60 +510,39 @@ namespace FOGTestPlatform
                 table_serial.DataReceived += new SerialDataReceivedEventHandler(tabledata_decode);
                 table_serial.Open();                
             }
-            if (testCfgPara.serialportEnable[1])
+            Channels_Hex_SW_list.Clear();
+            Channels_Data_SW_list.Clear();
+            timePara.drawIndexTime.Clear();
+            foreach (var item in chart.Series)
             {
-                if(ch1_serial.IsOpen)
-                {
-                    ch1_serial.Close();
-                }
-                ch1_serial.DataReceived += new SerialDataReceivedEventHandler(channeldata_decode);
-                ch1_serial.Open();
+                item.Points.Clear();
             }
-            if (testCfgPara.serialportEnable[23])
+            foreach (var item in Channels_FogData_list)
             {
-                if (ch2_serial.IsOpen)
-                {
-                    ch2_serial.Close();
-                }
-                ch2_serial.DataReceived += new SerialDataReceivedEventHandler(channeldata_decode);
-                ch2_serial.Open();
+                item.tdata_1s_array.Clear();
+                item.fdata_1s_array.Clear();
+                item.fdata_array.Clear();
+                item.tdata_array.Clear();
+
             }
-            if (testCfgPara.serialportEnable[3])
+            foreach (var item in channels_serial_list)
             {
-                if (ch3_serial.IsOpen)
+                int index = portIDList.IndexOf(item.PortName);
+                Channels_Hex_SW_list.Add(new StreamWriter(FilePara.CurrentDirectory + @"\" + Channels_FogData_list[index].FOGID + "_HexData_" + timePara.testTimes.ToString() + ".dat"));
+                Channels_Data_SW_list.Add(new StreamWriter(FilePara.CurrentDirectory + @"\" + Channels_FogData_list[index].FOGID + "_Data_" + timePara.testTimes.ToString() + ".dat"));
+                timePara.drawIndexTime.Add(0);
+                if (item.IsOpen)
                 {
-                    ch3_serial.Close();
+                    item.Close();
                 }
-                ch3_serial.DataReceived += new SerialDataReceivedEventHandler(channeldata_decode);
-                ch3_serial.Open();
+                item.DataReceived += new SerialDataReceivedEventHandler(channeldata_decode);
+                item.Open();
             }
-            if (testCfgPara.serialportEnable[4])
-            {
-                if (ch4_serial.IsOpen)
-                {
-                    ch4_serial.Close();
-                }
-                ch4_serial.DataReceived += new SerialDataReceivedEventHandler(channeldata_decode);
-                ch4_serial.Open();
-            }
-            if (testCfgPara.serialportEnable[5])
-            {
-                if (ch5_serial.IsOpen)
-                {
-                    ch5_serial.Close();
-                }
-                ch5_serial.DataReceived += new SerialDataReceivedEventHandler(channeldata_decode);
-                ch5_serial.Open();
-            }
-            if (testCfgPara.serialportEnable[6])
-            {
-                if (ch6_serial.IsOpen)
-                {
-                    ch6_serial.Close();
-                }
-                ch6_serial.DataReceived += new SerialDataReceivedEventHandler(channeldata_decode);
-                ch6_serial.Open();
-            }
+
+            Btn_Start.Enabled = false;
+            Btn_Stop.Enabled  = true;
+            timePara.testTimes++;
+            
         }
         /*************************************
         函数名：tabledata_decode
@@ -697,31 +631,9 @@ namespace FOGTestPlatform
         private void channeldata_decode(Object sender, SerialDataReceivedEventArgs e)
         {
             SerialPort serialPort = (SerialPort)sender;
-            if (serialPort.PortName == "COM1")
-            {
-                decodeFogData(serialPort, CH1_FogData);
-            }
-            if (serialPort.PortName == "COM2")
-            {
-                decodeFogData(serialPort, CH2_FogData);
-            }
-            if (serialPort.PortName == "COM3")
-            {
-                decodeFogData(serialPort, CH3_FogData);
-            }
-            if (serialPort.PortName == "COM4")
-            {
-                decodeFogData(serialPort, CH4_FogData);
-            }
-            if (serialPort.PortName == "COM5")
-            {
-                decodeFogData(serialPort, CH5_FogData);
-            }
-            if (serialPort.PortName == "COM6")
-            {
-                decodeFogData(serialPort, CH6_FogData);
-            }
-           
+            int index = portIDList.IndexOf(serialPort.PortName);
+
+            decodeFogData(serialPort, Channels_FogData_list[index]);
         }
 
 
@@ -767,7 +679,7 @@ namespace FOGTestPlatform
                     {
                         fogdata.buffer.CopyTo(0, fogdata.arrayRCVData, 0, 10);
                         fogdata.i_fdata = (Convert.ToInt32(fogdata.arrayRCVData[5]) * 128 * 128 * 128 * 128 + Convert.ToInt32(fogdata.arrayRCVData[4]) * 128 * 128 * 128
-                                                            + Convert.ToInt32(fogdata.arrayRCVData[3]) * 128 * 128 + Convert.ToInt32(fogdata.arrayRCVData[2]) * 128 + Convert.ToInt32(fogdata.arrayRCVData[1]));
+                                         + Convert.ToInt32(fogdata.arrayRCVData[3]) * 128 * 128 + Convert.ToInt32(fogdata.arrayRCVData[2]) * 128 + Convert.ToInt32(fogdata.arrayRCVData[1]));
                         fogdata.i_tdata = (fogdata.arrayRCVData[8] * 128 * 128 * 128 * 16 + fogdata.arrayRCVData[7] * 128 * 128 * 16) / (128 * 128 * 16);
 
                         fogdata.d_fdata = Convert.ToDouble(fogdata.i_fdata);
@@ -776,7 +688,7 @@ namespace FOGTestPlatform
                         fogdata.fdata_array.Add(fogdata.d_fdata);
                         fogdata.tdata_array.Add(fogdata.d_tdata);
                         fogdata.Counter++;
-                        //savedata(serialPort.PortName);
+                        SaveChannledata(serialPort.PortName);
                         if (fogdata.Counter % timePara.sampleFreq == 0)
                         {
                             fogdata.d_fdata_1s = fogdata.fdata_array.Average();
@@ -787,6 +699,8 @@ namespace FOGTestPlatform
                             fogdata.tdata_1s_array.Add(fogdata.d_tdata_1s);
                             fogdata.ave_Fog_data = fogdata.fdata_1s_array.Average();
                             fogdata.std_Fog_data = CalculateStdDev(fogdata.fdata_1s_array);
+                            fogdata.Fog_Bias_std = fogdata.std_Fog_data / fogdata.scaleFactor *3600;
+                            fogdata.Fog_Comped_data = fogdata.d_fdata_1s / fogdata.scaleFactor * 3600;
                             fogdata.fdata_array.Clear();
                             fogdata.tdata_array.Clear();
                             this.BeginInvoke(updateDataFrm, serialPort.PortName);
@@ -813,19 +727,64 @@ namespace FOGTestPlatform
         portName 串口号
         返回值：void
         *************************************/
-        private void showFogdata(string portName)
+        private void showFogdata(string PortName)
         {
-            switch(portName)
+            //port_Dic[PortName];
+            int index = portIDList.IndexOf(PortName);
+
+
+            switch(Channels_FogData_list[index].FOG_Channel)
             {
-                case "COM1":
+                case "通道一":
                     {
-                        tBox_ch1_currentdata.Text = CH1_FogData.d_fdata_1s.ToString();
-                        tBox_ch1_Caltdata.Text = CH1_FogData.d_fdata_1s.ToString();
-                        tBox_ch1_stddata.Text = CH1_FogData.d_fdata_1s.ToString();
-                        tBox_ch1_temdata.Text = CH1_FogData.d_tdata_1s.ToString();
+                        tBox_ch1_currentdata.Text = Channels_FogData_list[index].d_fdata_1s.ToString();
+                        tBox_ch1_Caltdata.Text    = Channels_FogData_list[index].Fog_Comped_data.ToString();
+                        tBox_ch1_stddata.Text     = Channels_FogData_list[index].Fog_Bias_std.ToString();
+                        tBox_ch1_temdata.Text     = Channels_FogData_list[index].d_tdata_1s.ToString();
+                        break;
+                    }
+                case "通道二":
+                    {
+                        tBox_ch2_currentdata.Text = Channels_FogData_list[index].d_fdata_1s.ToString();
+                        tBox_ch2_Caltdata.Text    = Channels_FogData_list[index].Fog_Comped_data.ToString();
+                        tBox_ch2_stddata.Text     = Channels_FogData_list[index].Fog_Bias_std.ToString();
+                        tBox_ch2_temdata.Text     = Channels_FogData_list[index].d_tdata_1s.ToString();
+                        break;
+                    }
+                case "通道三":
+                    {
+                        tBox_ch3_currentdata.Text = Channels_FogData_list[index].d_fdata_1s.ToString();
+                        tBox_ch3_Caltdata.Text    = Channels_FogData_list[index].Fog_Comped_data.ToString();
+                        tBox_ch3_stddata.Text     = Channels_FogData_list[index].Fog_Bias_std.ToString();
+                        tBox_ch3_temdata.Text     = Channels_FogData_list[index].d_tdata_1s.ToString();
+                        break;
+                    }
+                case "通道四":
+                    {
+                        tBox_ch4_currentdata.Text = Channels_FogData_list[index].d_fdata_1s.ToString();
+                        tBox_ch4_Caltdata.Text    = Channels_FogData_list[index].Fog_Comped_data.ToString();
+                        tBox_ch4_stddata.Text     = Channels_FogData_list[index].Fog_Bias_std.ToString();
+                        tBox_ch4_temdata.Text     = Channels_FogData_list[index].d_tdata_1s.ToString();
+                        break;
+                    }
+                case "通道五":
+                    {
+                        tBox_ch5_currentdata.Text = Channels_FogData_list[index].d_fdata_1s.ToString();
+                        tBox_ch5_Caltdata.Text    = Channels_FogData_list[index].Fog_Comped_data.ToString();
+                        tBox_ch5_stddata.Text     = Channels_FogData_list[index].Fog_Bias_std.ToString();
+                        tBox_ch5_temdata.Text     = Channels_FogData_list[index].d_tdata_1s.ToString();
+                        break;
+                    }
+                case "通道六":
+                    {
+                        tBox_ch6_currentdata.Text = Channels_FogData_list[index].d_fdata_1s.ToString();
+                        tBox_ch6_Caltdata.Text    = Channels_FogData_list[index].Fog_Comped_data.ToString();
+                        tBox_ch6_stddata.Text     = Channels_FogData_list[index].Fog_Bias_std.ToString();
+                        tBox_ch6_temdata.Text     = Channels_FogData_list[index].d_tdata_1s.ToString();
                         break;
                     }
             }
+            DrawFogData(PortName);
         }
         /*************************************
         函数名：CalculateStdDev
@@ -844,9 +803,136 @@ namespace FOGTestPlatform
                 std_data = Math.Sqrt(sum_data / (value.Count - 1));
 
             }
-
-
             return std_data;
+        }
+
+        /*************************************
+        函数名：SaveChannledata
+        创建日期：2019/11/04
+        函数功能：保存通道参数
+        函数参数：
+        PortName
+        返回值：void
+        *************************************/
+        private void SaveChannledata(string PortName)
+        {
+            int index = portIDList.IndexOf(PortName);
+            for (int i = 0; i < Channels_FogData_list[index].arrayRCVData.Length; i++)
+            {
+                Channels_Hex_SW_list[index].Write(Channels_FogData_list[index].arrayRCVData[i].ToString("X2") + "\t");
+            }
+            Channels_Hex_SW_list[index].Write("\n");
+            StringBuilder sb = new StringBuilder();
+            sb.AppendFormat("{0:0000000}", Channels_FogData_list[index].Counter);
+            sb.AppendFormat("\t{0:00000.00}", Channels_FogData_list[index].d_fdata);
+            sb.AppendFormat("\t{0:000.000}", Channels_FogData_list[index].d_tdata);
+            Channels_Data_SW_list[index].WriteLine(sb.ToString());
+            sb.Clear();
+
+        }
+
+        private void Btn_Stop_Click(object sender, EventArgs e)
+        {
+            foreach (var item in channels_serial_list)
+            {
+                item.Close();
+            }
+            foreach (var item in Channels_Hex_SW_list)
+            {
+                item.Close();
+            }
+            foreach (var item in Channels_Data_SW_list)
+            {
+                item.Close();
+            }
+            
+            Btn_Start.Enabled = true;
+            Btn_Stop.Enabled  = false;
+        }
+
+        private void chart_SelectionRangeChanged(object sender, CursorEventArgs e)
+        {
+            int index = 0;
+            List<double> lst = new List<double>();
+            //遍历陀螺对象，根据通道号确定索引号
+            foreach (var item in Channels_FogData_list)
+            {
+                string str = item.FOG_Channel;
+                if (str == e.ChartArea.Name)
+                {
+                    index = portIDList.IndexOf(item.Fog_PortName);
+                }
+                
+            }
+            if (chart.Series[2*index].Points.Count == 0 || e.NewSelectionEnd == e.NewSelectionStart)
+            {
+                return;
+            }
+            //确定缩放的起始点
+            double startPosition = Math.Min(e.NewSelectionStart, e.NewSelectionEnd);
+            double endPosition   = Math.Max(e.NewSelectionStart, e.NewSelectionEnd);
+            double myInterval    = endPosition - startPosition;
+            chart.ChartAreas[index].AxisX.ScaleView.Zoom(startPosition, endPosition);
+            chart.ChartAreas[index].AxisX.ScaleView.Position = startPosition;
+            chart.ChartAreas[index].AxisX.ScaleView.Size     = myInterval;
+            if (myInterval < 11.0)
+            {
+                chart.ChartAreas[index].AxisX.Interval = 1;
+            }
+            else
+            {
+                chart.ChartAreas[index].AxisX.Interval = Math.Floor(myInterval / 10.0);
+            }
+            for (int i = Convert.ToInt32(startPosition); i <= Convert.ToInt32(endPosition); i++)
+            {
+                lst.Add(chart.Series[index * 2].Points[i].YValues[0]);
+            }
+            double std = CalculateStdDev(lst);
+            tBox_info.Text += Channels_FogData_list[index].FOG_Channel + "_" + Channels_FogData_list[index].FOGID + "选择区间零偏稳定性为：" + (std / Channels_FogData_list[index].scaleFactor * 3600).ToString() + "\r\n";
+            Channels_FogData_list[index].zoomed_flag = true;
+        }
+
+        private void chart_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                for (int i = 0; i < portIDList.Count; i++)
+                {
+                    Channels_FogData_list[i].zoomed_flag = false;
+
+                }
+            }
+        }
+
+        /*************************************
+        函数名：ToolStripMenuItem_SerialCfgByFile_Click
+        创建日期：2019/11/06
+        函数功能：
+        函数参数：
+        sender
+        e
+        返回值：void
+        *************************************/
+        private void ToolStripMenuItem_SerialCfgByFile_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ConfigFileLoadDlg = new OpenFileDialog();
+            ConfigFileLoadDlg.InitialDirectory = System.AppDomain.CurrentDomain.BaseDirectory;
+            ConfigFileLoadDlg.DefaultExt = "xlsx";
+            ConfigFileLoadDlg.Filter = "Excel File(.xlsx)|*.xlsx";
+            if (ConfigFileLoadDlg.ShowDialog() == DialogResult.OK)
+            {
+                FilePara.ConfigFileLoadPath = ConfigFileLoadDlg.FileName;
+            }
+            //读取现有配置文件
+            FileStream rfile = new FileStream(FilePara.ConfigFileLoadPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            XSSFWorkbook workbook = new XSSFWorkbook(rfile);
+            rfile.Close();
+
+            SerialCfgDlg serialCfgDlg = new SerialCfgDlg(workbook);
+            if (serialCfgDlg.ShowDialog() == DialogResult.OK)
+            {
+                ConfigSerialPort();
+            }
         }
     }
  }
