@@ -18,6 +18,7 @@ namespace FOGTestPlatform
         public static string ConfigFilePath;
         public static string ConfigFileLoadPath; 
         public static string ClearDirectory = null;
+        public static List<string> dataFileList = new List<string>();
     }
     class SerialParameter
     {
@@ -37,6 +38,7 @@ namespace FOGTestPlatform
     {
         public int numOftestChannels;
         public bool[] serialportEnable = new bool[7];
+        public bool isLoadData = false;
     }
  
     public class Fogdata
@@ -49,10 +51,14 @@ namespace FOGTestPlatform
         public double d_tdata;
         public double d_fdata_1s;
         public double d_tdata_1s;
-        public List<double> fdata_array = new List<double>();//用于平滑的列表
-        public List<double> tdata_array = new List<double>();
+        public List<double> fdata_array = new List<double>();//用于平滑的列表,事后处理时候用于保存原始数据
+        public List<double> tdata_array = new List<double>();//用于平滑的列表,事后处理时候用于保存原始数据
+        public List<double> time_array = new List<double>();
         public List<double> fdata_1s_array = new List<double>();
         public List<double> tdata_1s_array = new List<double>();
+        public List<double> fdata_smooth_array = new List<double>();
+        public List<double> tdata_smooth_array = new List<double>();
+        public List<double> time_smooth_array = new List<double>();
         public double ave_Fog_data;
         public double std_Fog_data;
         public double Fog_Bias_std;
@@ -70,17 +76,28 @@ namespace FOGTestPlatform
         public double table_rate;
         public double table_drate;
         public double table_angle;
-        public byte[] arrayOriginData = new byte[12];
+        public byte[] arrayOriginData = new byte[13];
         public int Counter = 0;
+        public int SF_Counter = 0;
+        public int SF_Para_index = 0;
         
     }
     class TimePara
     {
         public int total_time = 0;
         public int dt;
-        public int sampleFreq = 200;
+        public int sampleFreq = 1000;
         public int drawCount = 0;
         public int testTimes = 0;
-        public List<int> drawIndexTime = new List<int>();
+        public int sampleTime = 0;//转速平稳，采样时间 1 = 100ms
+        public int switchRateTime = 0;//转速切换时间 1 = 100ms
+        public List<double> drawIndexTime = new List<double>();
     }
+    class ScaleFactorPara
+    {
+        public List<double> RatePara = new List<double>();
+        public int paracount = 0;
+
+    }
+
 }

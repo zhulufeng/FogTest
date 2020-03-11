@@ -39,24 +39,28 @@ namespace FOGTestPlatform
         //通道串口声明
         SerialPort table_serial = new SerialPort();
         List<SerialPort> channels_serial_list = new List<SerialPort>();
+        SerialData table_serialData = new SerialData();
         //保存文件流声明
         List<StreamWriter> Channels_Hex_SW_list = new List<StreamWriter>();
         List<StreamWriter> Channels_Data_SW_list = new List<StreamWriter>();
+        List<StreamWriter> Channels_SFData_SW_list = new List<StreamWriter>();
         List<string> Channels_portName_list = new List<string>();
         List<Fogdata> Channels_FogData_list = new List<Fogdata>();
-
-        SerialData table_serialData = new SerialData();
+        List<StreamReader> Channel_DataFile_SR_list = new List<StreamReader>();
+        
 
 
         //参数类对象声明
-        TestCfgPara testCfgPara = new TestCfgPara();
+        TestCfgPara testCfgPara = new TestCfgPara();//测试配置参数
         TableData tabledata = new TableData();
         TimePara timePara = new TimePara();
         List<string> portIDList = new List<string>();
-        
-
+        List<string> ChannelList = new List<string>();
+        ScaleFactorPara scaleFactorPara = new ScaleFactorPara();
+        bool isScaleFactorTest = false;
+        bool ScaleFactorTestStart = false;
         //定义委托
-        delegate void UpdateTableFrmEventHandle();
+        delegate void UpdateTableFrmEventHandle(bool isinfotBox,string text);
         delegate void UpdateDataFrmEventHandle(string portName);
         UpdateDataFrmEventHandle updateDataFrm;
         UpdateTableFrmEventHandle updateTableFrmdata;
@@ -82,11 +86,11 @@ namespace FOGTestPlatform
         public Form1()
         {
             InitializeComponent();
-            InitializeConfigFlie();
             IntializeChart();
             timePara.testTimes = 0;
             timePara.drawCount = 0;
-
+            timePara.sampleTime = 5000;
+            timePara.switchRateTime = 2000;
             updateTableFrmdata += new UpdateTableFrmEventHandle(showtabledata);
             updateDataFrm += new UpdateDataFrmEventHandle(showFogdata);
         }
@@ -108,7 +112,7 @@ namespace FOGTestPlatform
                 FileStream file = new FileStream(FilePara.ConfigFilePath, FileMode.Create);               
                 XSSFWorkbook hsswfworkbook = new XSSFWorkbook();
                 ISheet sheet = hsswfworkbook.CreateSheet("通道串口配置");
-                hsswfworkbook.CreateSheet("试验配置");
+                hsswfworkbook.CreateSheet("标度因数参数");
                 sheet.CreateRow(0).CreateCell(1).SetCellValue("使能");
                 sheet.GetRow(0).CreateCell(2).SetCellValue("串口号");
                 sheet.GetRow(0).CreateCell(3).SetCellValue("波特率");
@@ -311,6 +315,14 @@ namespace FOGTestPlatform
 
             return chartArea;
         }
+        /*************************************
+        函数名：DrawFogData
+        创建日期：2019/11/08
+        函数功能：实时采集画图
+        函数参数：
+        portName
+        返回值：void
+        *************************************/
         private void DrawFogData(string portName)
         {
             timePara.drawCount++;
@@ -325,7 +337,7 @@ namespace FOGTestPlatform
                     chart.ChartAreas[index].AxisY2.Maximum = Channels_FogData_list[index].tdata_1s_array.Max() + 1;
                     chart.ChartAreas[index].AxisY2.Minimum = Channels_FogData_list[index].tdata_1s_array.Min() - 1;
 
-                    chart.ChartAreas[index].AxisX.Interval           = (Channels_FogData_list[index].fdata_1s_array.Count / 10 + 1);
+                    chart.ChartAreas[index].AxisX.Interval           = (Channels_FogData_list[index].fdata_1s_array.Count / 20 + 1);
                     chart.ChartAreas[index].AxisX.ScaleView.Size     = Channels_FogData_list[index].fdata_1s_array.Count * 1.1;
                     chart.ChartAreas[index].AxisX.ScaleView.Position = 0.0;
                     chart.ChartAreas[index].CursorX.SelectionStart   = chart.ChartAreas[index].CursorX.SelectionEnd = 0.0;
@@ -338,6 +350,33 @@ namespace FOGTestPlatform
                 chart.Series[2 * index+1].Points.AddXY(timePara.drawIndexTime[index], Channels_FogData_list[index].d_tdata_1s);
             }
         }
+
+        private void DrawLoadFogdata(int index)
+        {
+//             chart.Series[2 * index].Points.Clear();
+//             chart.Series[2 * index + 1].Points.Clear(); 
+            if (!Channels_FogData_list[index].zoomed_flag)
+            {
+                chart.ChartAreas[index].AxisY.Maximum            = Channels_FogData_list[index].fdata_smooth_array.Max() + 100;
+                chart.ChartAreas[index].AxisY.Minimum            = Channels_FogData_list[index].fdata_smooth_array.Min() - 100;
+                chart.ChartAreas[index].AxisY2.Maximum           = Channels_FogData_list[index].tdata_smooth_array.Max() + 1;
+                chart.ChartAreas[index].AxisY2.Minimum           = Channels_FogData_list[index].tdata_smooth_array.Min() - 1;
+
+                chart.ChartAreas[index].AxisX.Interval           = (Channels_FogData_list[index].time_smooth_array.Max() / 20 + 1);
+                chart.ChartAreas[index].AxisX.ScaleView.Size     = Channels_FogData_list[index].time_smooth_array.Max();
+                chart.ChartAreas[index].AxisX.Minimum            = Channels_FogData_list[index].time_smooth_array.Min();
+                chart.ChartAreas[index].AxisX.Maximum            = Channels_FogData_list[index].time_smooth_array.Max();
+                chart.ChartAreas[index].AxisX.ScaleView.Position = 0.0;
+                chart.ChartAreas[index].CursorX.SelectionStart   = chart.ChartAreas[index].CursorX.SelectionEnd = 0.0;
+                chart.ChartAreas[index].CursorX.Position         = -1;
+
+            }
+            chart.Series[2 * index].ChartArea = chart.ChartAreas[index].Name;
+            chart.Series[2 * index + 1].ChartArea = chart.ChartAreas[index].Name;
+            chart.Series[2 * index].Points.DataBindXY(Channels_FogData_list[index].time_smooth_array, Channels_FogData_list[index].fdata_smooth_array);
+            chart.Series[2 * index + 1].Points.DataBindXY(Channels_FogData_list[index].time_smooth_array, Channels_FogData_list[index].tdata_smooth_array);
+        
+    }
         /*************************************
         函数名：ToolStripMenuItem_SerialCfgByDialog_Click
         创建日期：2019/10/22
@@ -349,12 +388,20 @@ namespace FOGTestPlatform
         *************************************/
         private void ToolStripMenuItem_SerialCfgByDialog_Click(object sender, EventArgs e)
         {
+            //判断是否有串口，没有则退出
+            string[] ArrayPort = SerialPort.GetPortNames();//搜索
+            if (ArrayPort.Length == 0)
+            {
+                MessageBox.Show("没有可用的串口！");
+                return;
+            }
+            InitializeConfigFlie();
             SerialCfgDlg serialCfgDlg = new SerialCfgDlg();
-
             if (serialCfgDlg.ShowDialog() != DialogResult.Cancel)
             {
                 ConfigSerialPort();
             }
+            testCfgPara.isLoadData = false;
         }
         
         /*************************************
@@ -370,13 +417,14 @@ namespace FOGTestPlatform
             FileStream rfile = new FileStream(FilePara.ConfigFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             XSSFWorkbook workbook = new XSSFWorkbook(rfile);
             rfile.Close();
+            portIDList.Clear();
             ISheet sht = workbook.GetSheet("通道串口配置");
             //配置转台参数
             if (sht.GetRow(1).GetCell(1).ToString() == "True")
             {
                 table_serial = SetSerialPara(0, sht);
                 testCfgPara.serialportEnable[0] = true;
-                portIDList.Add(sht.GetRow(1).GetCell(2).ToString());
+               // portIDList.Add(sht.GetRow(1).GetCell(2).ToString());
             }
             else
             {
@@ -388,6 +436,13 @@ namespace FOGTestPlatform
             {
                 if (sht.GetRow(i + 1).GetCell(1).ToString() == "True")
                 {
+                    //MessageBox.Show(sht.GetRow(i + 1).GetCell(2).ToString());
+                    if (sht.GetRow(i + 1).GetCell(2).ToString() == "null")
+                    {
+                        MessageBox.Show("有串口没有串口名，请重新配置串口！");
+                        Btn_Start.Enabled = false;
+                        return;
+                    }
                     SetChannelPara(i, sht, portIDList);
                 }
                 else
@@ -405,6 +460,8 @@ namespace FOGTestPlatform
             }
             else
             {
+                chart.ChartAreas.Clear();
+                chart.Series.Clear();
                 testCfgPara.numOftestChannels = Convert.ToInt32(sht.GetRow(8).GetCell(1).ToString());
                 AddChartArea(testCfgPara.numOftestChannels);
                 AddSeries(testCfgPara.numOftestChannels);
@@ -427,7 +484,7 @@ namespace FOGTestPlatform
             Fogdata fogdata = new Fogdata();
             channels_serial_list.Add(SetSerialPara(channelID, sht));
             testCfgPara.serialportEnable[channelID] = true;
-            portIDList.Add(sht.GetRow(channelID+1).GetCell(2).ToString());
+            portIDList.Add(sht.GetRow(channelID + 1).GetCell(2).ToString());
             fogdata.FOGID = sht.GetRow(channelID + 1).GetCell(7).ToString();
             fogdata.FOG_Channel = sht.GetRow(channelID + 1).GetCell(0).ToString();
             fogdata.scaleFactor = Convert.ToDouble(sht.GetRow(channelID + 1).GetCell(8).ToString());
@@ -508,10 +565,12 @@ namespace FOGTestPlatform
                     table_serial.Close();
                 }
                 table_serial.DataReceived += new SerialDataReceivedEventHandler(tabledata_decode);
-                table_serial.Open();                
+                table_serial.Open();
+                Send_table_Connect();
             }
             Channels_Hex_SW_list.Clear();
             Channels_Data_SW_list.Clear();
+            Channels_SFData_SW_list.Clear();
             timePara.drawIndexTime.Clear();
             foreach (var item in chart.Series)
             {
@@ -528,17 +587,21 @@ namespace FOGTestPlatform
             foreach (var item in channels_serial_list)
             {
                 int index = portIDList.IndexOf(item.PortName);
-                Channels_Hex_SW_list.Add(new StreamWriter(FilePara.CurrentDirectory + @"\" + Channels_FogData_list[index].FOGID + "_HexData_" + timePara.testTimes.ToString() + ".dat"));
+                Channels_Hex_SW_list.Add(new StreamWriter(FilePara.CurrentDirectory + @"\" + Channels_FogData_list[index].FOGID + "_HexData_" + timePara.testTimes.ToString() + ".hex"));
                 Channels_Data_SW_list.Add(new StreamWriter(FilePara.CurrentDirectory + @"\" + Channels_FogData_list[index].FOGID + "_Data_" + timePara.testTimes.ToString() + ".dat"));
+                if (isScaleFactorTest)
+                {
+                    Channels_SFData_SW_list.Add(new StreamWriter(FilePara.CurrentDirectory + @"\" + Channels_FogData_list[index].FOGID + "_SFData_" + timePara.testTimes.ToString() + ".dat"));
+                }
                 timePara.drawIndexTime.Add(0);
                 if (item.IsOpen)
                 {
                     item.Close();
                 }
                 item.DataReceived += new SerialDataReceivedEventHandler(channeldata_decode);
-                item.Open();
+                item.Open();//需要判断串口是否有
             }
-
+            ScaleFactorTestStart = true;
             Btn_Start.Enabled = false;
             Btn_Stop.Enabled  = true;
             timePara.testTimes++;
@@ -563,21 +626,21 @@ namespace FOGTestPlatform
             UInt32 CheckSumA = 0;
             UInt32 CheckSumB = 0;
             Union udata = new Union();
-            while (table_serialData.buffer.Count > 10)//判断缓存总是否保存大于一帧的数据
+            while (table_serialData.buffer.Count >= 13)//判断缓存总是否保存大于一帧的数据
             {
                 if (table_serialData.buffer[0] == 0xAA && table_serialData.buffer[1] == 0xA5 && table_serialData.buffer[2] == 0x55)//判断帧头
                 {
                     CheckSumA = 0;
                     CheckSumB = 0;
 
-                    for (int i = 0; i <= 10; i++)
+                    for (int i = 0; i <= 11; i++)
                     {
                         CheckSumA += table_serialData.buffer[i];
                     }
-                    CheckSumB = table_serialData.buffer[11];
+                    CheckSumB = table_serialData.buffer[12];
                     if ((CheckSumA & 0xFF) == CheckSumB)//校验通过开始解码
                     {
-                        table_serialData.buffer.CopyTo(0, tabledata.arrayOriginData, 0, 12);
+                        table_serialData.buffer.CopyTo(0, tabledata.arrayOriginData, 0, 13);
                         udata.b0 = tabledata.arrayOriginData[3];
                         udata.b1 = tabledata.arrayOriginData[4];
                         udata.b2 = tabledata.arrayOriginData[5];
@@ -589,10 +652,32 @@ namespace FOGTestPlatform
                         udata.b3 = tabledata.arrayOriginData[10];
                         tabledata.table_rate = Convert.ToDouble(udata.i) / 10000.0;
                         tabledata.Counter++;
-                        if (tabledata.Counter % 10 == 0)
+                        if (tabledata.Counter % 100 == 0)
                         {
-                            this.BeginInvoke(updateTableFrmdata);
+                            this.BeginInvoke(updateTableFrmdata,false,"");
                         }
+                        if(ScaleFactorTestStart)
+                        {
+                            if (tabledata.SF_Counter == (tabledata.SF_Para_index + 1) * timePara.sampleTime + (tabledata.SF_Para_index)*timePara.switchRateTime && tabledata.SF_Para_index < scaleFactorPara.paracount)//paracount  转速合计
+                            {
+                                int drate;
+                                if (Math.Abs(scaleFactorPara.RatePara[tabledata.SF_Para_index]) < 50)
+                                    drate = 20;
+                                else if (Math.Abs(scaleFactorPara.RatePara[tabledata.SF_Para_index]) >= 50 && Math.Abs(scaleFactorPara.RatePara[tabledata.SF_Para_index]) < 500)
+                                    drate = 50;
+                                else
+                                    drate = 100;
+                                //Send_table_rateCommand(scaleFactorPara.RatePara[tabledata.SF_Para_index], scaleFactorPara.RatePara[tabledata.SF_Para_index] / (timePara.switchRateTime / 10));
+                                Send_table_rateCommand(scaleFactorPara.RatePara[tabledata.SF_Para_index], drate);
+                               
+                                tabledata.SF_Para_index++;
+                                
+                            }
+
+                            tabledata.SF_Counter++;
+
+                        }
+                        table_serialData.buffer.RemoveRange(0, 13);
                     }
                     else//校验不对，移去一个字节
                     {
@@ -613,10 +698,12 @@ namespace FOGTestPlatform
         函数参数：
         返回值：void
         *************************************/
-        private void showtabledata()
+        private void showtabledata(bool isinfoTbox, string text="")
         {
             tBox_current_angle.Text = tabledata.table_angle.ToString();
             tBox_current_rate.Text = tabledata.table_rate.ToString();
+            if (isinfoTbox)
+                tBox_info.Text += text;
         }
 
         /*************************************
@@ -693,10 +780,12 @@ namespace FOGTestPlatform
                         {
                             fogdata.d_fdata_1s = fogdata.fdata_array.Average();
                             fogdata.d_tdata_1s = fogdata.tdata_array.Average();
-          
-
+                            fogdata.time_array.Add(Convert.ToDouble(fogdata.Counter) / timePara.sampleFreq);
                             fogdata.fdata_1s_array.Add(fogdata.d_fdata_1s);
                             fogdata.tdata_1s_array.Add(fogdata.d_tdata_1s);
+                            fogdata.fdata_smooth_array = fogdata.fdata_1s_array;
+                            fogdata.tdata_smooth_array = fogdata.tdata_1s_array;
+                            fogdata.time_smooth_array.Add(fogdata.Counter / timePara.sampleFreq);
                             fogdata.ave_Fog_data = fogdata.fdata_1s_array.Average();
                             fogdata.std_Fog_data = CalculateStdDev(fogdata.fdata_1s_array);
                             fogdata.Fog_Bias_std = fogdata.std_Fog_data / fogdata.scaleFactor *3600;
@@ -823,12 +912,24 @@ namespace FOGTestPlatform
             }
             Channels_Hex_SW_list[index].Write("\n");
             StringBuilder sb = new StringBuilder();
-            sb.AppendFormat("{0:0000000}", Channels_FogData_list[index].Counter);
+            sb.AppendFormat("{0:0000000}", Convert.ToDouble(Channels_FogData_list[index].Counter) / timePara.sampleFreq);
             sb.AppendFormat("\t{0:00000.00}", Channels_FogData_list[index].d_fdata);
             sb.AppendFormat("\t{0:000.000}", Channels_FogData_list[index].d_tdata);
             Channels_Data_SW_list[index].WriteLine(sb.ToString());
             sb.Clear();
-
+            if(ScaleFactorTestStart && tabledata.SF_Counter >= 550)//tabledata.SF_Counter 转台一个数加1  10Hz
+            {
+                if (tabledata.SF_Counter >= (tabledata.SF_Para_index - 1) * timePara.sampleTime + (tabledata.SF_Para_index)*1.5)
+                {
+                    sb.AppendFormat("{0:0000000}", Convert.ToDouble(Channels_FogData_list[index].Counter) / timePara.sampleFreq);
+                    sb.AppendFormat("\t{0:00000.00}", Channels_FogData_list[index].d_fdata);
+                    sb.AppendFormat("\t{0:00000.00}", tabledata.table_rate);
+                    sb.AppendFormat("\t{0:000}", tabledata.SF_Para_index );
+                }
+                Channels_SFData_SW_list[index].WriteLine(sb.ToString());
+                sb.Clear();
+            }
+            
         }
 
         private void Btn_Stop_Click(object sender, EventArgs e)
@@ -860,7 +961,15 @@ namespace FOGTestPlatform
                 string str = item.FOG_Channel;
                 if (str == e.ChartArea.Name)
                 {
-                    index = portIDList.IndexOf(item.Fog_PortName);
+                    if (testCfgPara.isLoadData)
+                    {
+                        index = ChannelList.IndexOf(item.FOG_Channel);
+                    }
+                    else
+                    {
+                        index = portIDList.IndexOf(item.Fog_PortName);
+                    }
+                    
                 }
                 
             }
@@ -885,6 +994,10 @@ namespace FOGTestPlatform
             }
             for (int i = Convert.ToInt32(startPosition); i <= Convert.ToInt32(endPosition); i++)
             {
+                if (endPosition > chart.Series[index * 2].Points.Count)
+                {
+                    break;
+                }
                 lst.Add(chart.Series[index * 2].Points[i].YValues[0]);
             }
             double std = CalculateStdDev(lst);
@@ -892,15 +1005,42 @@ namespace FOGTestPlatform
             Channels_FogData_list[index].zoomed_flag = true;
         }
 
+        /*************************************
+        函数名：chart_MouseClick
+        创建日期：2020/01/02
+        函数功能：鼠标右键恢复图
+        函数参数：
+        sender
+        e
+        返回值：void
+        *************************************/
         private void chart_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
             {
-                for (int i = 0; i < portIDList.Count; i++)
+                if(testCfgPara.isLoadData)
                 {
-                    Channels_FogData_list[i].zoomed_flag = false;
+                    for (int i = 0; i < ChannelList.Count; i++)
+                    {
+                        if (Channels_FogData_list[i].zoomed_flag)
+                        {
+                            Channels_FogData_list[i].zoomed_flag = false;
+                            DrawLoadFogdata(i);
+                        }
+                        
 
+                    }
                 }
+                else
+                {
+                    for (int i = 0; i < portIDList.Count; i++)
+                    {
+                        Channels_FogData_list[i].zoomed_flag = false;
+                        DrawLoadFogdata(i);
+                    }
+                }
+                
+                
             }
         }
 
@@ -915,6 +1055,14 @@ namespace FOGTestPlatform
         *************************************/
         private void ToolStripMenuItem_SerialCfgByFile_Click(object sender, EventArgs e)
         {
+            //判断是否有串口，没有则退出
+            string[] ArrayPort = SerialPort.GetPortNames();//搜索
+            if (ArrayPort.Length == 0)
+            {
+                MessageBox.Show("没有可用的串口！");
+                return;
+            }
+            InitializeConfigFlie();
             OpenFileDialog ConfigFileLoadDlg = new OpenFileDialog();
             ConfigFileLoadDlg.InitialDirectory = System.AppDomain.CurrentDomain.BaseDirectory;
             ConfigFileLoadDlg.DefaultExt = "xlsx";
@@ -928,11 +1076,427 @@ namespace FOGTestPlatform
             XSSFWorkbook workbook = new XSSFWorkbook(rfile);
             rfile.Close();
 
-            SerialCfgDlg serialCfgDlg = new SerialCfgDlg(workbook);
+            SerialCfgDlg serialCfgDlg = new SerialCfgDlg(workbook);//配置文件导入
             if (serialCfgDlg.ShowDialog() == DialogResult.OK)
             {
                 ConfigSerialPort();
             }
+            //标度因数试验参数设置
+            DialogResult dr;
+            ISheet shtCfg = workbook.GetSheet("通道串口配置");
+            dr = MessageBox.Show("需要导入标度因数测试的参数吗？", "确认对话框", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+            if (dr == DialogResult.Yes)
+            {
+                while (!testCfgPara.serialportEnable[0])//判断转台串口是否已经配置好   如果没有配置好重新配置//shtCfg.GetRow(1).GetCell(1).ToString() != "True"
+                {
+                    MessageBox.Show("转台串口没有配置，请重新配置！");
+                    if (serialCfgDlg.ShowDialog() == DialogResult.OK)
+                    {
+                        ConfigSerialPort();
+                    }
+                    
+                }
+                rfile = new FileStream(FilePara.ConfigFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                workbook = new XSSFWorkbook(rfile);
+                rfile.Close();
+                ISheet sht = workbook.GetSheet("标度因数参数");
+                //配置转台通道
+                IRow row = sht.GetRow(1);
+                scaleFactorPara.paracount = Convert.ToInt32(GetCell(sht, 2, 1).ToString());
+                for (int i = 0; i < scaleFactorPara.paracount; i++)
+                {
+                    scaleFactorPara.RatePara.Add(Convert.ToDouble(GetCell(sht, 3, i).ToString()));
+                }
+                isScaleFactorTest = true;
+            }
+            else
+            {
+                return;
+            }
+
+        }
+
+        private void ToolStripMenuItem_LoadDataFiles_Click(object sender, EventArgs e)
+        {
+            LoadDataFileDialog loadDataFileDialog = new LoadDataFileDialog();
+            string[] dataSplited;//分割后字符串数组
+
+            char[] rnSplitChar = new char[] { '\r', '\n', '_' };//分割符号
+            char[] trnSplitChar = new char[] { '\r', '\n', '\t', ' ','\\' };
+            testCfgPara.isLoadData = true;
+            Channels_FogData_list.Clear();
+            chart.ChartAreas.Clear();
+            chart.Series.Clear();
+            FilePara.dataFileList.Clear();
+            Channel_DataFile_SR_list.Clear();
+            ChannelList.Clear();
+            if (loadDataFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                if (FilePara.dataFileList.Count() > 0)
+                {
+                    foreach (var item in FilePara.dataFileList)
+                    {
+                        Fogdata fogdata = new Fogdata();
+                        string filenameStr;
+                        string dataLine;
+                        StreamReader SR = new StreamReader(item);
+                        int time = 0;
+                        Channel_DataFile_SR_list.Add(SR);
+                        dataSplited = item.Split(trnSplitChar, StringSplitOptions.RemoveEmptyEntries);
+                        filenameStr = dataSplited.Last();
+                        dataSplited = filenameStr.Split(rnSplitChar, StringSplitOptions.RemoveEmptyEntries);
+                        fogdata.FOGID = dataSplited[dataSplited.Length - 1 - 2];
+                        fogdata.FOG_Channel = "CH" + (FilePara.dataFileList.IndexOf(item) + 1);
+                        fogdata.scaleFactor = loadDataFileDialog.scaleFactorList[FilePara.dataFileList.IndexOf(item)];
+                        ChannelList.Add(fogdata.FOG_Channel);
+                        
+                        while (!SR.EndOfStream)
+                        {
+                            dataLine = SR.ReadLine();
+                            dataSplited = dataLine.Split(trnSplitChar, StringSplitOptions.RemoveEmptyEntries);
+                            //fogdata.time_array.Add(Convert.ToDouble(dataSplited[0]));
+                            fogdata.fdata_array.Add(Convert.ToDouble(dataSplited[1]));
+                            fogdata.tdata_array.Add(Convert.ToDouble(dataSplited[2]));
+                            if (Convert.ToInt32(dataSplited[0]) % timePara.sampleFreq == 0)
+                            {
+                                time++;
+                                fogdata.time_array.Add(time);
+                                fogdata.fdata_1s_array.Add(fogdata.fdata_array.Sum() / timePara.sampleFreq);
+                                fogdata.tdata_1s_array.Add(fogdata.tdata_array.Sum() / timePara.sampleFreq);
+                                fogdata.fdata_array.Clear();
+                                fogdata.tdata_array.Clear();
+                                
+                            }
+                        }
+                        fogdata.fdata_smooth_array = fogdata.fdata_1s_array;
+                        fogdata.tdata_smooth_array = fogdata.tdata_1s_array;
+                        Channels_FogData_list.Add(fogdata);
+
+                    }
+                    AddChartArea(Channel_DataFile_SR_list.Count());
+                    AddSeries(Channel_DataFile_SR_list.Count());
+                    for (int i = 0; i < Channels_FogData_list.Count; i++)
+                    {
+                        DrawLoadFogdata(i);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("没有选择数据文件啊!");
+                }
+            }
+
+            
+        }
+
+        private void Btn_Smooth_Click(object sender, EventArgs e)
+        {
+            double smoothTime = Convert.ToDouble(tBox_smoothTime.Text);
+            for (int i = 0; i < Channels_FogData_list.Count; i++)
+            {
+                int index = Convert.ToInt32(Channels_FogData_list[i].fdata_1s_array.Count / Convert.ToInt32(smoothTime));
+                Channels_FogData_list[i].time_smooth_array.Clear();
+                //Channels_FogData_list[i].fdata_smooth_array.Clear();
+                //Channels_FogData_list[i].tdata_smooth_array.Clear();
+
+                
+                Channels_FogData_list[i].fdata_smooth_array = SmoothData(Channels_FogData_list[i].fdata_1s_array, Convert.ToInt32(smoothTime));
+                Channels_FogData_list[i].tdata_smooth_array = SmoothData(Channels_FogData_list[i].tdata_1s_array, Convert.ToInt32(smoothTime));
+                for (int j = 0; j < index; j++)
+                {
+                    Channels_FogData_list[i].time_smooth_array.Add(j + 1);
+                }
+//                 for (int j = 0; j < index; j++)
+//                 {
+//                     double[] data_array = new double[Convert.ToInt32(smoothTime)];
+//                     Channels_FogData_list[i].fdata_1s_array.CopyTo(j* Convert.ToInt32(smoothTime), data_array,0, Convert.ToInt32(smoothTime));
+//                     Channels_FogData_list[i].fdata_smooth_array.Add(data_array.Average());
+//                     Channels_FogData_list[i].tdata_1s_array.CopyTo(j * Convert.ToInt32(smoothTime), data_array, 0, Convert.ToInt32(smoothTime));
+//                     Channels_FogData_list[i].tdata_smooth_array.Add(data_array.Average());
+//                     Channels_FogData_list[i].time_array.Add(j + 1);
+//                     Channels_FogData_list[i].Fog_Bias_std = CalculateStdDev(Channels_FogData_list[i].fdata_smooth_array) / Channels_FogData_list[i].scaleFactor * 3600;
+//                 }
+            }
+            foreach (var item in chart.Series)
+            {
+                item.Points.Clear();
+            }
+            for (int i = 0; i < Channels_FogData_list.Count; i++)
+            {
+                DrawLoadFogdata(i);
+            }
+        }
+
+        private List<double> SmoothData(List<double> data_list, int smoothTime)
+        {
+            List<double> smoothData_list = new List<double>();
+            int index = data_list.Count / smoothTime;
+            double[] data_array = new double[smoothTime];
+            for (int i = 0; i < index; i++)
+            {
+                data_list.CopyTo(i * smoothTime, data_array, 0, smoothTime);
+                smoothData_list.Add(data_array.Average());
+            }
+
+
+
+            return smoothData_list;
+        }
+        public void Send_table_Enable()
+        {
+            byte[] Sendbuff = new byte[15];
+            Sendbuff[0] = 0xAA;
+            Sendbuff[1] = 0xA5;
+            Sendbuff[2] = 0x55;
+            Sendbuff[3] = 0x1E;
+            int checksum = 0;
+            for (int i = 0; i < 4; i++)
+            {
+                Sendbuff[i + 4] = 0;
+                Sendbuff[i + 8] = 0;
+            }
+            Sendbuff[8] = 0x00;
+
+            for (int i = 0; i < 13; i++)
+            {
+                checksum += Sendbuff[i];
+            }
+            Sendbuff[13] = Convert.ToByte(checksum & 0xff);
+            table_serial.Write(Sendbuff, 0, 14);
+            tBox_info.Text += DateTime.Now.ToString("yyyyMMdd-HHmmss") +  ":  发送转台使能指令！" + "\r\n";
+        }
+        public void Send_table_Stop()
+        {
+            byte[] Sendbuff = new byte[15];
+            Sendbuff[0] = 0xAA;
+            Sendbuff[1] = 0xA5;
+            Sendbuff[2] = 0x55;
+            Sendbuff[3] = 0x1F;
+            int checksum = 0;
+            for (int i = 0; i < 4; i++)
+            {
+                Sendbuff[i + 4] = 0;
+                Sendbuff[i + 8] = 0;
+            }
+            Sendbuff[8] = 0x00;
+
+            for (int i = 0; i < 13; i++)
+            {
+                checksum += Sendbuff[i];
+            }
+            Sendbuff[13] = Convert.ToByte(checksum & 0xff);
+            table_serial.Write(Sendbuff, 0, 14);
+            tBox_info.Text += DateTime.Now.ToString("yyyyMMdd-HHmmss") + ":  发送转台停止指令！" + "\r\n";
+        }
+        public void Send_table_Connect()
+        {
+            byte[] Sendbuff = new byte[15];
+            Sendbuff[0] = 0xAA;
+            Sendbuff[1] = 0xA5;
+            Sendbuff[2] = 0x55;
+            Sendbuff[3] = 0x0F;
+            int checksum = 0;
+            for (int i = 0; i < 4; i++)
+            {
+                Sendbuff[i + 4] = 0;
+                Sendbuff[i + 8] = 0;
+            }
+            Sendbuff[8] = 0x00;
+
+            for (int i = 0; i < 13; i++)
+            {
+                checksum += Sendbuff[i];
+            }
+            Sendbuff[13] = Convert.ToByte(checksum & 0xff);
+            table_serial.Write(Sendbuff, 0, 14);
+            tBox_info.Text += DateTime.Now.ToString("yyyyMMdd-HHmmss") + ":  发送转台通讯指令！" + "\r\n";
+        }
+        public void Send_table_rateCommand(double rate,double drate)
+        {
+            byte[] Sendbuff = new byte[15];
+            
+            int irate;
+            int idrate;
+            int checksum = 0;
+
+            irate = Convert.ToInt32(rate * 10000);
+            idrate = Convert.ToInt32(drate * 10000);
+            Sendbuff[0] = 0xAA;
+            Sendbuff[1] = 0xA5;
+            Sendbuff[2] = 0x55;
+            Sendbuff[3] = 0x13;
+            Sendbuff[4] = Convert.ToByte(irate & 0xff);
+            Sendbuff[5] = Convert.ToByte((irate >> 8) & 0xff);
+            Sendbuff[6] = Convert.ToByte((irate >> 16) & 0xff);
+            Sendbuff[7] = Convert.ToByte((irate >> 24) & 0xff);
+            Sendbuff[8] = 0x00;
+            Sendbuff[9] = Convert.ToByte(idrate & 0xff);
+            Sendbuff[10] = Convert.ToByte((idrate >> 8) & 0xff);
+            Sendbuff[11] = Convert.ToByte((idrate >> 16) & 0xff);
+            Sendbuff[12] = Convert.ToByte((idrate >> 24) & 0xff);
+            for (int i = 0; i < 13; i++)
+            {
+                checksum += Sendbuff[i];
+            }
+            Sendbuff[13] = Convert.ToByte(checksum & 0xff);
+            table_serial.Write(Sendbuff, 0, 14);
+            string info_text = DateTime.Now.ToString("yyyyMMdd-HHmmss") + ":  发送转台速率指令！速率为：" + rate.ToString() + ", 加速率为："+ drate.ToString() + "\r\n";
+            this.BeginInvoke(updateTableFrmdata, true,info_text);
+
+        }
+        /*************************************
+       函数名：GetCell
+       创建日期：2019/10/25
+       函数功能：判断EXCEL中单元格是否创建，没有则创建
+       函数参数：
+           sheet
+           row_num
+           cell_num
+       返回值：NPOI.SS.UserModel.ICell
+       *************************************/
+        public ICell GetCell(ISheet sheet, int row_num, int cell_num)
+        {
+            IRow row = sheet.GetRow(row_num) == null ? sheet.CreateRow(row_num) : sheet.GetRow(row_num);
+            ICell cell = row.GetCell(cell_num) == null ? row.CreateCell(cell_num) : row.GetCell(cell_num);
+
+            return cell;
+        }
+
+        private void Btn_Table_Enable_Click(object sender, EventArgs e)
+        {
+            Send_table_Connect();
+            Send_table_Enable();
+        }
+
+        private void Brn_Table_stop_Click(object sender, EventArgs e)
+        {
+            Send_table_Stop();
+        }
+
+        private void Btn_AngleSet_Send_Click(object sender, EventArgs e)
+        {
+            byte[] Sendbuff = new byte[15];
+            int angle;
+            int rate;
+            int checksum = 0;
+            angle = Convert.ToInt32(Convert.ToDouble(tBox_AngleSet_angle.Text) * 10000);
+            rate = Convert.ToInt32(Convert.ToDouble(tBox_AngleSet_rate.Text) * 10000);
+            Sendbuff[0] = 0xAA;
+            Sendbuff[1] = 0xA5;
+            Sendbuff[2] = 0x55;
+
+            Sendbuff[3] = 0x11;
+            Sendbuff[4] = Convert.ToByte(angle & 0xff);
+            Sendbuff[5] = Convert.ToByte((angle >> 8) & 0xff);
+            Sendbuff[6] = Convert.ToByte((angle >> 16) & 0xff);
+            Sendbuff[7] = Convert.ToByte((angle >> 24) & 0xff);
+            Sendbuff[8] = 0xA0;
+            Sendbuff[9] = Convert.ToByte(rate & 0xff);
+            Sendbuff[10] = Convert.ToByte((rate >> 8) & 0xff);
+            Sendbuff[11] = Convert.ToByte((rate >> 16) & 0xff);
+            Sendbuff[12] = Convert.ToByte((rate >> 24) & 0xff);
+
+            for (int i = 0; i < 13; i++)
+            {
+                checksum += Sendbuff[i];
+            }
+            Sendbuff[13] = Convert.ToByte(checksum & 0xff);
+            table_serial.Write(Sendbuff, 0, 14);
+            tBox_info.Text += DateTime.Now.ToString("yyyyMMdd-HHmmss") + ":  发送转台角度指令！角度为：" + tBox_AngleSet_angle.Text + ", 速率为：" + tBox_AngleSet_rate.Text + "\r\n";
+        }
+
+        private void Btn_RateSet_Send_Click(object sender, EventArgs e)
+        {
+            byte[] Sendbuff = new byte[15];
+            int drate;
+            int rate;
+            int checksum = 0;
+            rate = Convert.ToInt32(Convert.ToDouble(tBox_RateSet_rate.Text) * 10000);
+            drate = Convert.ToInt32(Convert.ToDouble(tBox_RateSet_drate .Text) * 10000);
+            Sendbuff[0] = 0xAA;
+            Sendbuff[1] = 0xA5;
+            Sendbuff[2] = 0x55;
+
+            Sendbuff[3] = 0x13;
+            Sendbuff[4] = Convert.ToByte(rate & 0xff);
+            Sendbuff[5] = Convert.ToByte((rate >> 8) & 0xff);
+            Sendbuff[6] = Convert.ToByte((rate >> 16) & 0xff);
+            Sendbuff[7] = Convert.ToByte((rate >> 24) & 0xff);
+            Sendbuff[8] = 0x00;
+            Sendbuff[9] = Convert.ToByte(drate & 0xff);
+            Sendbuff[10] = Convert.ToByte((drate >> 8) & 0xff);
+            Sendbuff[11] = Convert.ToByte((drate >> 16) & 0xff);
+            Sendbuff[12] = Convert.ToByte((drate >> 24) & 0xff);
+
+            for (int i = 0; i < 13; i++)
+            {
+                checksum += Sendbuff[i];
+            }
+            Sendbuff[13] = Convert.ToByte(checksum & 0xff);
+            table_serial.Write(Sendbuff, 0, 14);
+            tBox_info.Text += DateTime.Now.ToString("yyyyMMdd-HHmmss") + ":  发送转台速率指令！速率为：" + tBox_RateSet_rate.Text + ", 加速率为：" + tBox_RateSet_drate.Text + "\r\n";
+        }
+
+        private void Btn_Step_Send_Click(object sender, EventArgs e)
+        {
+            byte[] Sendbuff = new byte[15];
+            int angle;
+            int rate;
+            int checksum = 0;
+            angle = Convert.ToInt32(Convert.ToDouble(tBox_SetpRate_angle.Text) * 10000);
+            rate = Convert.ToInt32(Convert.ToDouble(tBox_SetpRate_rate.Text) * 10000);
+            Sendbuff[0] = 0xAA;
+            Sendbuff[1] = 0xA5;
+            Sendbuff[2] = 0x55;
+
+            Sendbuff[3] = 0x12;
+            Sendbuff[4] = Convert.ToByte(rate & 0xff);
+            Sendbuff[5] = Convert.ToByte((rate >> 8) & 0xff);
+            Sendbuff[6] = Convert.ToByte((rate >> 16) & 0xff);
+            Sendbuff[7] = Convert.ToByte((rate >> 24) & 0xff);
+            Sendbuff[8] = 0x00;
+            Sendbuff[9] = Convert.ToByte(angle & 0xff);
+            Sendbuff[10] = Convert.ToByte((angle >> 8) & 0xff);
+            Sendbuff[11] = Convert.ToByte((angle >> 16) & 0xff);
+            Sendbuff[12] = Convert.ToByte((angle >> 24) & 0xff);
+
+            for (int i = 0; i < 13; i++)
+            {
+                checksum += Sendbuff[i];
+            }
+            Sendbuff[13] = Convert.ToByte(checksum & 0xff);
+            table_serial.Write(Sendbuff, 0, 14);
+            tBox_info.Text += DateTime.Now.ToString("yyyyMMdd-HHmmss") + ":  发送转台点动指令！角度为：" + tBox_SetpRate_angle.Text + ", 速率为：" + tBox_SetpRate_rate.Text + "\r\n";
+        }
+
+        private void Btn_Swing_Send_Click(object sender, EventArgs e)
+        {
+            byte[] Sendbuff = new byte[15];
+            int amp;
+            int freq;
+            int checksum = 0;
+            amp = Convert.ToInt32(Convert.ToDouble(tBox_Swing_Amp.Text) * 10000);
+            freq = Convert.ToInt32(Convert.ToDouble(tBox_Swing_Amp.Text) * 10000);
+
+            Sendbuff[3] = 0x14;
+            Sendbuff[4] = Convert.ToByte(amp & 0xff);
+            Sendbuff[5] = Convert.ToByte((amp >> 8) & 0xff);
+            Sendbuff[6] = Convert.ToByte((amp >> 16) & 0xff);
+            Sendbuff[7] = Convert.ToByte((amp >> 24) & 0xff);
+            Sendbuff[8] = 0x00;
+            Sendbuff[9] = Convert.ToByte(freq & 0xff);
+            Sendbuff[10] = Convert.ToByte((freq >> 8) & 0xff);
+            Sendbuff[11] = Convert.ToByte((freq >> 16) & 0xff);
+            Sendbuff[12] = Convert.ToByte((freq >> 24) & 0xff);
+
+            for (int i = 0; i < 13; i++)
+            {
+                checksum += Sendbuff[i];
+            }
+            Sendbuff[13] = Convert.ToByte(checksum & 0xff);
+            table_serial.Write(Sendbuff, 0, 14);
+            tBox_info.Text += DateTime.Now.ToString("yyyyMMdd-HHmmss") + ":  发送转台摇摆指令！角度为：" + tBox_SetpRate_angle.Text + ", 频率为：" + tBox_SetpRate_rate.Text + "\r\n";
         }
     }
+    
  }

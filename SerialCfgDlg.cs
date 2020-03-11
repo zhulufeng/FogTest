@@ -37,6 +37,7 @@ namespace FOGTestPlatform
         public SerialCfgDlg()
         {
             InitializeComponent();
+            
             //SetConfigFile();
             setComBox();
             checkedListBox_Channel.SetItemChecked(0, true);
@@ -53,7 +54,7 @@ namespace FOGTestPlatform
             isByFile = true;
             setComBox();
             SetFormByConfigFile(workbook);
-            
+            File.Copy(FilePara.ConfigFileLoadPath, FilePara.ConfigFilePath, true);
             
         }
         /*************************************
@@ -247,11 +248,20 @@ namespace FOGTestPlatform
             FileStream rfile = new FileStream(FilePara.ConfigFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             XSSFWorkbook workbook = new XSSFWorkbook(rfile);
             rfile.Close();
-
+            
             ISheet sht = workbook.GetSheet("通道串口配置");
             //配置转台通道
             IRow row = sht.GetRow(1);
             ICell cell = GetCell(sht, 1, 1);
+            //清空原来的表格中所有参数
+            for (int i = 1; i < 8; i++)
+                for (int j = 2; j < 9; j++)
+                {
+                    cell = GetCell(sht, i, j);
+                    cell.SetCellType(CellType.Blank); 
+                }
+
+            cell = GetCell(sht, 1, 1);
             if (groupBox_Table.Enabled)
             {
                 cell.SetCellValue("True");
@@ -486,8 +496,10 @@ namespace FOGTestPlatform
             }
             cell = GetCell(sht, 8, 1);
             cell.SetCellValue(SelectedChannelsNum);
+            
             //写入配置文件
-            FileStream wfile = new FileStream(FilePara.ConfigFilePath, FileMode.Open, FileAccess.ReadWrite);
+//            FileStream wfile = new FileStream(FilePara.ConfigFilePath, FileMode.Open, FileAccess.ReadWrite);
+            FileStream wfile = new FileStream(FilePara.ConfigFilePath, FileMode.Create);
             workbook.Write(wfile);
             wfile.Close();
         }
@@ -544,7 +556,7 @@ namespace FOGTestPlatform
             catch (Exception)
             {
                 MessageBox.Show("未接入串口！");
-                //throw;
+                //Btn_Cancel.Click();
             }
             
 
@@ -562,7 +574,9 @@ namespace FOGTestPlatform
         *************************************/
         private void Btn_OK_Click(object sender, EventArgs e)
         {
+            
             SetConfigFile();
+            
         }
 
         
