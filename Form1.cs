@@ -430,7 +430,10 @@ namespace FOGTestPlatform
             {
                 testCfgPara.serialportEnable[0] = false;
             }
-
+            //先清空通道参数
+            channels_serial_list.Clear();
+            portIDList.Clear();
+            Channels_FogData_list.Clear();
             //配置各通道参数
             for (int i = 1; i <= 6; i++)
             {
