@@ -89,8 +89,8 @@ namespace FOGTestPlatform
             IntializeChart();
             timePara.testTimes = 0;
             timePara.drawCount = 0;
-            timePara.sampleTime = 5000;
-            timePara.switchRateTime = 2000;
+            timePara.sampleTime = 500;
+            timePara.switchRateTime = 1000;
             updateTableFrmdata += new UpdateTableFrmEventHandle(showtabledata);
             updateDataFrm += new UpdateDataFrmEventHandle(showFogdata);
         }
@@ -662,14 +662,31 @@ namespace FOGTestPlatform
                             {
                                 int drate;
                                 if (Math.Abs(scaleFactorPara.RatePara[tabledata.SF_Para_index]) < 50)
-                                    drate = 20;
+                                {
+                                    drate = 25;
+                                   // timePara.switchRateTime = 500;
+                                }
+
                                 else if (Math.Abs(scaleFactorPara.RatePara[tabledata.SF_Para_index]) >= 50 && Math.Abs(scaleFactorPara.RatePara[tabledata.SF_Para_index]) < 500)
-                                    drate = 50;
-                                else
+                                {
                                     drate = 100;
+                                    //timePara.switchRateTime = 500;
+                                }
+                                else
+                                {
+                                    drate = 150;
+                                   // timePara.switchRateTime = 2000;
+
+                                }
+//                                 if (tabledata.SF_Para_index == scaleFactorPara.paracount - 1)
+//                                 {
+//                                     drate = 80;
+//                                    // timePara.switchRateTime = 500;
+//                                 }
+                                  
                                 //Send_table_rateCommand(scaleFactorPara.RatePara[tabledata.SF_Para_index], scaleFactorPara.RatePara[tabledata.SF_Para_index] / (timePara.switchRateTime / 10));
                                 Send_table_rateCommand(scaleFactorPara.RatePara[tabledata.SF_Para_index], drate);
-                               
+                                
                                 tabledata.SF_Para_index++;
                                 
                             }
@@ -703,7 +720,11 @@ namespace FOGTestPlatform
             tBox_current_angle.Text = tabledata.table_angle.ToString();
             tBox_current_rate.Text = tabledata.table_rate.ToString();
             if (isinfoTbox)
-                tBox_info.Text += text;
+            {
+                tBox_info.AppendText(text);
+                tBox_info.ScrollToCaret();
+                //tBox_info.Text += text;
+            }
         }
 
         /*************************************
