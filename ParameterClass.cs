@@ -97,6 +97,7 @@ namespace FOGTestPlatform
     {
         public List<double> RatePara = new List<double>();
         public int paracount = 0;
+        public int rateParaID = 1;
 
     }
 

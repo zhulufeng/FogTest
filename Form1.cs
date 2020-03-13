@@ -1127,10 +1127,69 @@ namespace FOGTestPlatform
                 //配置转台通道
                 IRow row = sht.GetRow(1);
                 scaleFactorPara.paracount = Convert.ToInt32(GetCell(sht, 2, 1).ToString());
-                for (int i = 0; i < scaleFactorPara.paracount; i++)
+                int rateParaIndex = 0;
+                if (GetCell(sht, 0, 1).ToString() != "")
                 {
-                    scaleFactorPara.RatePara.Add(Convert.ToDouble(GetCell(sht, 3, i).ToString()));
+                    scaleFactorPara.rateParaID = Convert.ToInt32(GetCell(sht, 0, 1).ToString());
                 }
+                
+                if (GetCell(sht, 2 * scaleFactorPara.rateParaID, 3).ToString() != "")
+                {
+                    timePara.sampleTime = Convert.ToInt32(GetCell(sht, 2, 3).ToString()) * 100;
+                }
+
+                if (GetCell(sht, 2 * scaleFactorPara.rateParaID, 5).ToString() != "")
+                {
+                    timePara.switchRateTime = Convert.ToInt32(GetCell(sht, 2, 5).ToString()) * 100;
+                }
+                while (GetCell(sht, 3, rateParaIndex).ToString().ToLower() != "end")
+                {
+                    scaleFactorPara.RatePara.Add(Convert.ToDouble(GetCell(sht, 3, rateParaIndex).ToString()));
+                    rateParaIndex++;
+                }
+                if (Math.Abs(scaleFactorPara.RatePara.Sum()) <= 0.005)
+                {
+                    tBox_info.Text += "标度因数试验数据导入成功！\r\n";
+                    tBox_info.Text += "数据编号是：" + scaleFactorPara.rateParaID.ToString() + "\t" + "旋转时间：" + (timePara.sampleTime / 100).ToString() + "秒\t" + "变速时间是：" + (timePara.switchRateTime / 100).ToString() + "秒" + "\r\n";
+                    tBox_info.Text += "转速为：\r\n";
+                    for (int i = 0; i < scaleFactorPara.RatePara.Count; i++)
+                    {
+                        tBox_info.Text += scaleFactorPara.RatePara[i].ToString() + ",";
+                    }
+                    tBox_info.Text += "\r\n";
+                }
+                else
+                {
+                    tBox_info.Text += "转速为：\r\n";
+                    for (int i = 0; i < scaleFactorPara.RatePara.Count; i++)
+                    {
+                        tBox_info.Text += scaleFactorPara.RatePara[i].ToString() + ",";
+                    }
+                    tBox_info.Text += "\r\n";
+                    DialogResult rateDr;
+                    rateDr = MessageBox.Show("转速好像有点不对称,是否继续？", "确认对话框", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+                    if (dr == DialogResult.No)
+                    {
+                        MessageBox.Show("请确认配置文件后，重新导入！");
+                        return;
+                    }
+                    else
+                    {
+                        tBox_info.Text += "标度因数试验数据导入成功！\r\n";
+                        tBox_info.Text += "数据编号是：" + scaleFactorPara.rateParaID.ToString() + "\t" + "旋转时间：" + (timePara.sampleTime / 100).ToString() + "秒\t" + "变速时间是：" + (timePara.switchRateTime / 100).ToString() + "秒\r\n";
+                        tBox_info.Text += "转速为：\r\n";
+                        for (int i = 0; i < scaleFactorPara.RatePara.Count; i++)
+                        {
+                            tBox_info.Text += scaleFactorPara.RatePara[i].ToString() + ",";
+                        }
+                        tBox_info.Text += "\r\n";
+                    }
+                    //tBox_info.Text += "转速好像有点不对称？\n";
+                }
+                //                 for (int i = 0; i < scaleFactorPara.paracount; i++)
+                //                 {
+                //                     scaleFactorPara.RatePara.Add(Convert.ToDouble(GetCell(sht, 3, i).ToString()));
+                //                 }
                 isScaleFactorTest = true;
             }
             else
