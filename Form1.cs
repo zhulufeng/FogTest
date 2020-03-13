@@ -59,6 +59,7 @@ namespace FOGTestPlatform
         ScaleFactorPara scaleFactorPara = new ScaleFactorPara();
         bool isScaleFactorTest = false;
         bool ScaleFactorTestStart = false;
+        bool SaveSFDataStart = false;
         //定义委托
         delegate void UpdateTableFrmEventHandle(bool isinfotBox,string text);
         delegate void UpdateDataFrmEventHandle(string portName);
@@ -691,7 +692,7 @@ namespace FOGTestPlatform
                                 Send_table_rateCommand(scaleFactorPara.RatePara[tabledata.SF_Para_index], drate);
                                 
                                 tabledata.SF_Para_index++;
-                                
+                                SaveSFDataStart = true;
                             }
 
                             tabledata.SF_Counter++;
@@ -941,9 +942,9 @@ namespace FOGTestPlatform
             sb.AppendFormat("\t{0:000.000}", Channels_FogData_list[index].d_tdata);
             Channels_Data_SW_list[index].WriteLine(sb.ToString());
             sb.Clear();
-            if(ScaleFactorTestStart && tabledata.SF_Counter >= 550)//tabledata.SF_Counter 转台一个数加1  10Hz
+            if(SaveSFDataStart)//tabledata.SF_Counter 转台一个数加1  100Hz
             {
-                if (tabledata.SF_Counter >= (tabledata.SF_Para_index - 1) * timePara.sampleTime + (tabledata.SF_Para_index)*1.5)
+                if (tabledata.SF_Counter >= (tabledata.SF_Para_index) * timePara.sampleTime + (tabledata.SF_Para_index) * timePara.switchRateTime)
                 {
                     sb.AppendFormat("{0:0000000}", Convert.ToDouble(Channels_FogData_list[index].Counter) / timePara.sampleFreq);
                     sb.AppendFormat("\t{0:00000.00}", Channels_FogData_list[index].d_fdata);
@@ -1157,6 +1158,7 @@ namespace FOGTestPlatform
                         tBox_info.Text += scaleFactorPara.RatePara[i].ToString() + ",";
                     }
                     tBox_info.Text += "\r\n";
+                    tBox_info.Text += "总共有：" + scaleFactorPara.RatePara.Count.ToString() + "个转速\r\n";
                 }
                 else
                 {
@@ -1183,6 +1185,7 @@ namespace FOGTestPlatform
                             tBox_info.Text += scaleFactorPara.RatePara[i].ToString() + ",";
                         }
                         tBox_info.Text += "\r\n";
+                        tBox_info.Text += "总共有：" + scaleFactorPara.RatePara.Count.ToString() + "个转速\r\n";
                     }
                     //tBox_info.Text += "转速好像有点不对称？\n";
                 }
