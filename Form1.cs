@@ -948,11 +948,13 @@ namespace FOGTestPlatform
                 {
                     sb.AppendFormat("{0:0000000}", Convert.ToDouble(Channels_FogData_list[index].Counter) / timePara.sampleFreq);
                     sb.AppendFormat("\t{0:00000.00}", Channels_FogData_list[index].d_fdata);
+                    sb.AppendFormat("\t{0:000.000}", Channels_FogData_list[index].d_tdata);
                     sb.AppendFormat("\t{0:00000.00}", tabledata.table_rate);
                     sb.AppendFormat("\t{0:000}", tabledata.SF_Para_index );
+                    Channels_SFData_SW_list[index].WriteLine(sb.ToString());
+                    sb.Clear();
                 }
-                Channels_SFData_SW_list[index].WriteLine(sb.ToString());
-                sb.Clear();
+                
             }
             
         }
@@ -1129,16 +1131,17 @@ namespace FOGTestPlatform
                 IRow row = sht.GetRow(1);
                 scaleFactorPara.paracount = Convert.ToInt32(GetCell(sht, 2, 1).ToString());
                 int rateParaIndex = 0;
-                if (GetCell(sht, 0, 1).ToString() != "")
+                //配置转速编号
+                if (GetCell(sht, 0, 1).ToString() != "")//配置转速编号
                 {
                     scaleFactorPara.rateParaID = Convert.ToInt32(GetCell(sht, 0, 1).ToString());
                 }
-                
+                //配置旋转时间
                 if (GetCell(sht, 2 * scaleFactorPara.rateParaID, 3).ToString() != "")
                 {
                     timePara.sampleTime = Convert.ToInt32(GetCell(sht, 2, 3).ToString()) * 100;
                 }
-
+                //配置变速时间
                 if (GetCell(sht, 2 * scaleFactorPara.rateParaID, 5).ToString() != "")
                 {
                     timePara.switchRateTime = Convert.ToInt32(GetCell(sht, 2, 5).ToString()) * 100;
@@ -1148,6 +1151,7 @@ namespace FOGTestPlatform
                     scaleFactorPara.RatePara.Add(Convert.ToDouble(GetCell(sht, 3, rateParaIndex).ToString()));
                     rateParaIndex++;
                 }
+                scaleFactorPara.paracount = scaleFactorPara.RatePara.Count;
                 if (Math.Abs(scaleFactorPara.RatePara.Sum()) <= 0.005)
                 {
                     tBox_info.Text += "标度因数试验数据导入成功！\r\n";
