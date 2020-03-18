@@ -689,7 +689,7 @@ namespace FOGTestPlatform
 //                                 }
                                   
                                 //Send_table_rateCommand(scaleFactorPara.RatePara[tabledata.SF_Para_index], scaleFactorPara.RatePara[tabledata.SF_Para_index] / (timePara.switchRateTime / 10));
-                                Send_table_rateCommand(scaleFactorPara.RatePara[tabledata.SF_Para_index], drate);
+                                //Send_table_rateCommand(scaleFactorPara.RatePara[tabledata.SF_Para_index], drate);
                                 
                                 tabledata.SF_Para_index++;
                                 SaveSFDataStart = true;
@@ -940,19 +940,22 @@ namespace FOGTestPlatform
             sb.AppendFormat("{0:0000000}", Convert.ToDouble(Channels_FogData_list[index].Counter) / timePara.sampleFreq);
             sb.AppendFormat("\t{0:00000.00}", Channels_FogData_list[index].d_fdata);
             sb.AppendFormat("\t{0:000.000}", Channels_FogData_list[index].d_tdata);
+            sb.AppendFormat("\t{0:00000.00}", tabledata.table_rate);
             Channels_Data_SW_list[index].WriteLine(sb.ToString());
             sb.Clear();
             if(SaveSFDataStart)//tabledata.SF_Counter 转台一个数加1  100Hz
             {
-                if (tabledata.SF_Counter >= (tabledata.SF_Para_index) * timePara.sampleTime + (tabledata.SF_Para_index) * timePara.switchRateTime)
+                //if (tabledata.SF_Counter >= (tabledata.SF_Para_index) * timePara.sampleTime + (tabledata.SF_Para_index) * timePara.switchRateTime)
                 {
                     sb.AppendFormat("{0:0000000}", Convert.ToDouble(Channels_FogData_list[index].Counter) / timePara.sampleFreq);
                     sb.AppendFormat("\t{0:00000.00}", Channels_FogData_list[index].d_fdata);
+                    sb.AppendFormat("\t{0:000.000}", Channels_FogData_list[index].d_tdata);
                     sb.AppendFormat("\t{0:00000.00}", tabledata.table_rate);
                     sb.AppendFormat("\t{0:000}", tabledata.SF_Para_index );
+                    Channels_SFData_SW_list[index].WriteLine(sb.ToString());
+                    sb.Clear();
                 }
-                Channels_SFData_SW_list[index].WriteLine(sb.ToString());
-                sb.Clear();
+               
             }
             
         }
